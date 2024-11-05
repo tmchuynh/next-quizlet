@@ -10,6 +10,9 @@ export default function RootLayout( {
     return (
         <html lang="en">
             <head>
+                <link rel="preconnect" href="https://fonts.googleapis.com" />
+                <link rel="preconnect" href="https://fonts.gstatic.com" />
+                <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Text:ital@0;1&family=PT+Sans+Narrow:wght@400;700&family=Titan+One&display=swap" rel="stylesheet" />
                 <title>My App</title>
             </head>
             <body>

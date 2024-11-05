@@ -19,18 +19,21 @@ export default function NotFound() {
     }, [] );
 
     return (
-        <div className={`${ styles.notFoundContainer }`}>
-            <div>
-                <div className={`${ styles.digitContainer }`}>
-                    <span className={styles.digit}>{digits.first}</span>
-                    <span className={styles.digit}>{digits.second}</span>
-                    <span className={styles.digit}>{digits.third}</span>
+        <>
+            <div className={`${ styles.notFoundContainer }`}>
+                <div>
+                    <div className={`${ styles.digitContainer }`}>
+                        <span className={styles.digit}>{digits.first}</span>
+                        <span className={styles.digit}>{digits.second}</span>
+                        <span className={styles.digit}>{digits.third}</span>
+                    </div>
+                    <p className={styles.message}>Oops! The page you're looking for doesn't exist.</p>
+                    <Link href="/" className={styles.backHomeLink}>
+                        Go back to Home
+                    </Link>
                 </div>
-                <p className={styles.message}>Oops! The page you're looking for doesn't exist.</p>
-                <Link href="/" className={styles.backHomeLink}>
-                    Go back to Home
-                </Link>
             </div>
-        </div>
+        </>
+
     );
 }
