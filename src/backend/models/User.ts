@@ -1,30 +1,38 @@
-import { Sequelize, DataTypes } from 'sequelize';
+// models/User.ts
+
+import { DataTypes, Model } from 'sequelize';
 import sequelize from '../config/database';
 
-export const User = sequelize.define( 'User', {
+class User extends Model { }
+
+User.init( {
     user_id: {
         type: DataTypes.INTEGER,
         autoIncrement: true,
-        primaryKey: true
+        primaryKey: true,
     },
     username: {
-        type: DataTypes.STRING,
+        type: DataTypes.STRING( 50 ),
         unique: true,
-        allowNull: false
+        allowNull: false,
     },
     email: {
-        type: DataTypes.STRING,
+        type: DataTypes.STRING( 100 ),
         unique: true,
-        allowNull: false
+        allowNull: false,
     },
-    password: {
-        type: DataTypes.STRING,
-        allowNull: false
+    password_hash: {
+        type: DataTypes.STRING( 255 ),
+        allowNull: false,
     },
     created_at: {
         type: DataTypes.DATE,
-        defaultValue: Sequelize.NOW
-    }
+        defaultValue: DataTypes.NOW,
+    },
 }, {
-    timestamps: false
+    sequelize,
+    modelName: 'User',
+    timestamps: false,
 } );
+
+export default User;
