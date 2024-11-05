@@ -1,22 +1,15 @@
-export default function HomePage( {
-    register,
-    login,
-}: {
-    children: React.ReactNode;
-    register: React.ReactNode;
-    login: React.ReactNode;
-} ) {
-    return (
-        <>
-            <header>
-                <h1>Welcome to My App</h1>
-            </header>
+// app/page.tsx
+"use client"; // Enables client-side behavior for this file
 
-            <main>
-                <aside>{register}</aside>
-                <aside>{login}</aside>
-            </main>
-        </>
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
-    );
+export default function Home() {
+    const router = useRouter();
+
+    useEffect( () => {
+        router.push( '/auth' ); // Redirect to /auth
+    }, [router] );
+
+    return null; // Or add fallback content if needed
 }
