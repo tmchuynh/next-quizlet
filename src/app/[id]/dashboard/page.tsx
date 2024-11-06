@@ -5,8 +5,6 @@ import React, { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useUser } from '@auth0/nextjs-auth0/client';
 import ColorPickerComponent from '../../components/ColorPicker'; // Updated import
-import iro from '@jaames/iro';
-import ColorPicker from "@jaames/iro";
 import { formatDate } from "../../utils/formatUtils";
 
 
