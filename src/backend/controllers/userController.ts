@@ -21,12 +21,16 @@ export const getUserProfile = async ( req: Request, res: Response ) => {
     }
 };
 
-export async function getUserById( auth0UserId: any ) {
-    const token = process.env.AUTH0_MGMT_API_ACCESS_TOKEN; // Ensure this is your Management API access token
+export async function getUserById( auth0UserId: string ) {
+    const token = process.env.AUTH0_MGMT_API_ACCESS_TOKEN;
+
+    if ( !process.env.NEXT_PUBLIC_AUTH0_ISSUER_BASE_URL ) {
+        throw new Error( "The AUTH0_ISSUER_BASE_URL environment variable is not set correctly." );
+    }
 
     const options = {
         method: 'GET',
-        url: `https://${ process.env.NEXT_PUBLIC_AUTH0_ISSUER_BASE_URL }/api/v2/users/${ auth0UserId }`,
+        url: `${ process.env.NEXT_PUBLIC_AUTH0_ISSUER_BASE_URL }/api/v2/users/${ auth0UserId }`,
         headers: {
             authorization: `Bearer ${ token }`,
         },
@@ -48,7 +52,8 @@ export async function addUserToDatabase( user_id: any ) {
 
         if ( !user ) {
             // If user doesn't exist, create a new entry
-            user = await User.create( { user_id } );
+            const date = new Date();
+            user = await User.create( { user_id, created_at: date } );
             console.log( "User added to database:", user );
         } else {
             console.log( "User already exists in database:", user );

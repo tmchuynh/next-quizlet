@@ -2,6 +2,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import type { FC } from "react";
 import { useRouter, useParams } from 'next/navigation';
 import { useUser } from '@auth0/nextjs-auth0/client';
 import ColorPickerComponent from '../../components/ColorPicker'; // Updated import
@@ -9,7 +10,7 @@ import { formatDate } from "../../utils/formatUtils";
 import { User } from "../../types/index";
 
 
-const DashboardPage: React.FC = () => {
+const DashboardPage: FC = () => {
     const { user, isLoading } = useUser();
     const router = useRouter();
     const params = useParams();
@@ -17,19 +18,14 @@ const DashboardPage: React.FC = () => {
     const [baseColor, setBaseColor] = useState( '#6a40d4' );
 
     useEffect( () => {
-        // Redirect if unauthorized or load user profile
         if ( !isLoading ) {
             if ( !user || user.sub !== params.id ) {
-                router.push( '/auth' ); // Redirect to auth if unauthorized
+                router.push( '/auth' );
             } else {
                 loadUserProfile( user.sub! );
             }
         }
     }, [isLoading, user, params.id] );
-
-    useEffect( () => {
-        createContributionGrid( baseColor );
-    }, [baseColor] );
 
     const loadUserProfile = async ( userId: string ) => {
         try {
@@ -48,19 +44,24 @@ const DashboardPage: React.FC = () => {
     if ( isLoading ) return <p>Loading...</p>;
 
     return (
-        <div className="dashboard-container flex flex-col items-center min-h-screen px-6 py-4 lg:px-8 bg-gray-800 text-white rounded-lg w-full lg:w-2/3">
-            <h2 className="text-4xl font-extrabold mb-5">User Profile</h2>
-            {userProfile && (
-                <div className="profile-info space-y-4">
-                    <p>ID: {userProfile.id}</p>
-                </div>
-            )}
-            {/* Use the imported ColorPicker component */}
-            <ColorPickerComponent onColorChange={setBaseColor} />
-            <div id="contributionGrid" className="grid grid-cols-4 m-auto p-5 col-span justify-items-center"></div>
-        </div>
+        <>
+            <div className="dashboard-container flex flex-col items-center min-h-screen px-6 py-4 lg:px-8 bg-gray-800 text-white rounded-lg w-full lg:w-2/3">
+                <h2 className="text-4xl font-extrabold mb-5">User Profile</h2>
+                {userProfile && (
+                    <div className="profile-info space-y-4">
+                        <p>ID: {userProfile.id}</p>
+                    </div>
+                )}
+                <ColorPickerComponent onColorChange={setBaseColor} />
+                <ColorPickerComponent onColorChange={setBaseColor} />
+                <div id="contributionGrid" className="grid grid-cols-4 m-auto p-5 col-span justify-items-center"></div>
+                <ColorPickerComponent onColorChange={setBaseColor} />
+                <div id="contributionGrid" className="grid grid-cols-4 m-auto p-5 col-span justify-items-center"></div>
+            </div>
+        </>
     );
 };
+
 
 // Function to create the contribution grid
 export const createContributionGrid = ( baseColor: string ) => {

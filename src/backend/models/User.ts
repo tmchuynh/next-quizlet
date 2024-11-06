@@ -1,19 +1,15 @@
 import { DataTypes, Model, Optional } from 'sequelize';
 import sequelize from '../config/database';
+import { User } from '../../app/types/index';
 
-interface UserAttributes {
-    user_id: string;
-    created_at?: Date;
-}
+type UserCreationAttributes = Optional<User, 'user_id' | 'created_at'>;
 
-type UserCreationAttributes = Optional<UserAttributes, 'user_id'>;
-
-class User extends Model<UserAttributes, UserCreationAttributes> implements UserAttributes {
+class User_ extends Model<User, UserCreationAttributes> implements User {
     public user_id!: string;
     public readonly created_at!: Date;
 }
 
-User.init(
+User_.init(
     {
         user_id: {
             type: DataTypes.STRING,
@@ -34,4 +30,4 @@ User.init(
     }
 );
 
-export default User;
+export default User_;

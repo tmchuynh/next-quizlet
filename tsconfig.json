@@ -29,8 +29,8 @@
     "incremental": true,
     "paths": {
       "@/*": [
-        "./*"
-      ],
+        "./src/*"
+      ] // Pointing to src folder for path aliases
     },
     "plugins": [
       {
@@ -44,7 +44,9 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     "src/**/*.ts",
-    "src/backend/server.js"
+    "src/**/*.tsx", // Ensure .tsx files in src are included
+    "src/backend/server.js",
+    "src/backend/config/database.js"
   ],
   "exclude": [
     "node_modules"

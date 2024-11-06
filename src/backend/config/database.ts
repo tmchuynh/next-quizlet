@@ -1,5 +1,6 @@
 // src/backend/config/database.ts
 import { Sequelize } from 'sequelize';
+import mysql2 from 'mysql2';
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -9,10 +10,17 @@ const sequelize = new Sequelize(
     process.env.MYSQL_USER!,
     process.env.MYSQL_PASSWORD!,
     {
-        host: process.env.MYSQL_HOST!,
+        host: process.env.MYSQL_HOST,
         dialect: 'mysql',
-        logging: false,
-        dialectModule: require( 'mysql2' ),
+        dialectModule: mysql2,
     }
 );
+
+try {
+    await sequelize.authenticate();
+    console.log( 'Connection has been established successfully.' );
+} catch ( error ) {
+    console.error( 'Unable to connect to the database:', error );
+}
+
 export default sequelize;

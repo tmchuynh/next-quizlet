@@ -5,8 +5,8 @@ import React, { useEffect } from "react";
 import "./styles.css";
 import { UserProvider } from "@auth0/nextjs-auth0/client";
 import Header from "./components/Header";
-import Head from "next/head";
 import auth0 from 'auth0-js';
+import Head from "next/head";
 import { NotFoundProvider, useNotFound } from "../context/NotFoundContext";
 
 export default function RootLayout( {

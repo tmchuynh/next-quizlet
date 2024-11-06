@@ -13,7 +13,7 @@ const AuthPage = () => {
 
         if ( user ) {
             // Redirect to the user's dashboard using their unique identifier
-            router.push( `/${ user.sub }/dashboard` );
+            router.push( `/api/users/${ user.sub }` );
         } else {
             // If not logged in, direct to the login page
             router.push( '/api/auth/login' );
