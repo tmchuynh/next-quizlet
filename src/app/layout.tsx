@@ -1,11 +1,12 @@
 // src/app/layout.tsx
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import "./styles.css";
 import { UserProvider } from "@auth0/nextjs-auth0/client";
 import Header from "./components/Header";
 import Head from "next/head";
+import auth0 from 'auth0-js';
 import { NotFoundProvider, useNotFound } from "../context/NotFoundContext";
 
 export default function RootLayout( {
@@ -13,6 +14,51 @@ export default function RootLayout( {
 }: {
     children: React.ReactNode;
 } ) {
+    const clientID = process.env.NEXT_PUBLIC_AUTH0_CLIENT_ID || "YOUR_FALLBACK_CLIENT_ID";
+    const domain = process.env.NEXT_PUBLIC_AUTH0_DOMAIN || "YOUR_FALLBACK_DOMAIN";
+
+    useEffect( () => {
+        const loadAuth0Script = () => {
+            return new Promise<void>( ( resolve, reject ) => {
+                if ( document.getElementById( "auth0-script" ) ) {
+                    resolve(); // Script already loaded
+                    return;
+                }
+                const script = document.createElement( "script" );
+                script.id = "auth0-script";
+                script.src = "https://cdn.auth0.com/js/auth0/9.18/auth0.min.js";
+                script.async = true;
+                script.onload = () => resolve();
+                script.onerror = reject;
+                document.head.appendChild( script );
+            } );
+        };
+
+        loadAuth0Script()
+            .then( () => {
+                if ( window.auth0 ) {
+                    const webAuth = new auth0.WebAuth( {
+                        domain,
+                        clientID,
+                        redirectUri: `${ process.env.AUTH0_BASE_URL }/api/auth/callback`,
+                        responseType: "token id_token",
+                        scope: "openid profile email",
+                    } );
+
+                    try {
+                        webAuth.crossOriginVerification();
+                    } catch ( error ) {
+                        console.error( "Error executing crossOriginVerification:", error );
+                    }
+                } else {
+                    console.error( "Auth0 script not loaded properly." );
+                }
+            } )
+            .catch( ( error ) => {
+                console.error( "Failed to load Auth0 script:", error );
+            } );
+    }, [domain, clientID] );
+
     return (
         <html lang="en">
             <Head>
@@ -27,7 +73,7 @@ export default function RootLayout( {
             <body>
                 <UserProvider>
                     <NotFoundProvider>
-                        <MainContent children={children} />
+                        <MainContent>{children}</MainContent>
                     </NotFoundProvider>
                 </UserProvider>
             </body>
