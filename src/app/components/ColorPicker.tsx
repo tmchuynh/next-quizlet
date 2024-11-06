@@ -1,7 +1,7 @@
 // components/ColorPicker.tsx
 import React, { useEffect, useRef } from 'react';
 import iro from '@jaames/iro';
-import { updateContributionGridColorTheme } from '../[id]/dashboard/page';
+import { createContributionGrid } from '../[id]/dashboard/page';
 
 interface ColorPickerProps {
     onColorChange: ( color: string ) => void;
@@ -34,6 +34,10 @@ const ColorPickerComponent: React.FC<ColorPickerProps> = ( { onColorChange, init
     return <div ref={pickerRef} className="color-picker mt-5"></div>;
 };
 
-
+function updateContributionGridColorTheme( baseColor: string ) {
+    const gridContainer = document.getElementById( 'contributionGrid' );
+    gridContainer?.remove();
+    createContributionGrid( baseColor );
+}
 
 export default ColorPickerComponent;
