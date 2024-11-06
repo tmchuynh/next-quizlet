@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { Question, ProgressItem } from '../../../types';
 import shuffle from '../../../utils/shuffle';
 
-const QuizPage: React.FC<{ params: Promise<{ slug: string; difficulty: string; }>; }> = ( { params } ) => {
+const QuizPage: React.FC<{ params: Promise<{ slug: string; difficulty: string; }>; }> = props => {
+    const params = use(props.params);
     const router = useRouter();
     const [slug, setSlug] = useState<string | null>( null );
     const [difficulty, setDifficulty] = useState<string | null>( null );
