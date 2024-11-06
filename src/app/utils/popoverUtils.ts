@@ -1,3 +1,5 @@
+import { createPopper } from '@popperjs/core';
+
 /**
  * Initializes a popover for displaying password requirements.
  *
@@ -9,7 +11,7 @@ export function initializePasswordPopover( passwordInput: HTMLElement ): void {
     const popover = document.getElementById( "popover-password" ) as HTMLElement;
 
     // Initialize Popper.js
-    const popperInstance = Popper.createPopper( passwordInput, popover, {
+    const popperInstance = createPopper( passwordInput, popover, {
         modifiers: [
             {
                 name: "offset",

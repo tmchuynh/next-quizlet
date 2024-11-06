@@ -57,54 +57,36 @@ export const completeProfile = async ( req: Request, res: Response ): Promise<vo
     const { firstName, lastName, username, email } = req.body;
     const session = await getSession( req, res );
 
-    if ( !session || !session.user ) {
-        return res.status( 401 ).json( { message: 'Unauthorized' } );
-    }
-
     try {
         // Update user with additional information
         const updatedUser = await User.update(
             { first_name: firstName, last_name: lastName, username, email },
-            { where: { user_id: session.user.sub } }
+            { where: { user_id: session?.user.sub } }
         );
 
         res.status( 200 ).json( { message: 'Profile completed', user: updatedUser } );
     } catch ( error ) {
         console.error( 'Error completing profile:', error );
-        res.status( 500 ).json( { message: 'Error completing profile' } );
+        res;
     }
 };
 
 
-export const loginUser = async ( req: NextApiRequest, res: NextApiResponse ): Promise<void> => {
+export const loginUser: ( req: Request, res: Response ) => Promise<void> = async ( req, res ) => {
     const { username, password } = req.body;
 
     try {
-        // Find user by username
         const user = await User.findOne( { where: { username } } );
         if ( !user ) {
             res.status( 404 ).json( { message: 'User not found' } );
-            return;
         }
 
-        // Check if password is valid
-        const isPasswordValid = await bcrypt.compare( password, user.password_hash );
+        const isPasswordValid = await bcrypt.compare( password, user?.password_hash! );
         if ( !isPasswordValid ) {
-            res.status( 401 ).json( { message: 'Incorrect password' } );
-            return;
+            res.status( 401 ).json( { message: 'Unauthorized' } );
         }
 
-        // Respond with user data
-        res.status( 200 ).json( {
-            message: 'Login successful',
-            user: {
-                user_id: user.user_id,
-                username: user.username,
-                email: user.email,
-                firstName: user.first_name,
-                lastName: user.last_name,
-            },
-        } );
+        res.status( 200 ).json( { message: 'Login successful' } );
     } catch ( error ) {
         console.error( 'Error logging in user:', error );
         res.status( 500 ).json( { message: 'Internal server error' } );

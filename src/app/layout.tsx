@@ -1,5 +1,6 @@
 import React from "react";
 import './styles.css';
+import { UserProvider } from '@auth0/nextjs-auth0/client';
 
 
 export default function RootLayout( {
@@ -16,7 +17,9 @@ export default function RootLayout( {
                 <title>My App</title>
             </head>
             <body>
-                {children}
+                <UserProvider>
+                    {children}
+                </UserProvider>
             </body>
         </html>
     );
