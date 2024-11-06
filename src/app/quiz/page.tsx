@@ -3,7 +3,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { QuizOption, ProgressItem, Score } from '../types';
+import { QuizOption, ProgressItem } from '../types/index';
 
 const QuizSelectionPage: React.FC = () => {
     const router = useRouter();
@@ -19,18 +19,22 @@ const QuizSelectionPage: React.FC = () => {
                 if ( !response.ok ) throw new Error( 'Failed to fetch data' );
                 const { quizzes, user, progress } = await response.json();
 
-                // Set the data to state
                 setQuizOptions( quizzes );
                 setQuizProgress( progress );
                 setUser( user );
                 setIsLoading( false );
+
+                if ( !user ) {
+                    router.push( '/login' );  // Redirect if no user data
+                }
             } catch ( error ) {
                 console.error( 'Error loading data:', error );
             }
         };
 
         loadData();
-    }, [] );
+    }, [router] );
+
 
     const handleQuizSelection = ( quizId: string ) => {
         sessionStorage.setItem( 'quizId', quizId );

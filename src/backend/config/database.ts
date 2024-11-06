@@ -12,6 +12,7 @@ const sequelize = new Sequelize(
         host: process.env.MYSQL_HOST!,
         dialect: 'mysql',
         logging: false,
+        dialectModule: require( 'mysql2' ),
     }
 );
 export default sequelize;

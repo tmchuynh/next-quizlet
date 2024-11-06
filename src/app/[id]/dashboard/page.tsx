@@ -6,25 +6,18 @@ import { useRouter, useParams } from 'next/navigation';
 import { useUser } from '@auth0/nextjs-auth0/client';
 import ColorPickerComponent from '../../components/ColorPicker'; // Updated import
 import { formatDate } from "../../utils/formatUtils";
+import { User } from "../../types/index";
 
-
-// Define user profile type
-interface UserProfile {
-    id: string;
-    username: string;
-    email: string;
-    firstName: string;
-    lastName: string;
-}
 
 const DashboardPage: React.FC = () => {
     const { user, isLoading } = useUser();
     const router = useRouter();
     const params = useParams();
-    const [userProfile, setUserProfile] = useState<UserProfile | null>( null );
+    const [userProfile, setUserProfile] = useState<User | null>( null );
     const [baseColor, setBaseColor] = useState( '#6a40d4' );
 
     useEffect( () => {
+        // Redirect if unauthorized or load user profile
         if ( !isLoading ) {
             if ( !user || user.sub !== params.id ) {
                 router.push( '/auth' ); // Redirect to auth if unauthorized
@@ -52,16 +45,14 @@ const DashboardPage: React.FC = () => {
         }
     };
 
+    if ( isLoading ) return <p>Loading...</p>;
+
     return (
         <div className="dashboard-container flex flex-col items-center min-h-screen px-6 py-4 lg:px-8 bg-gray-800 text-white rounded-lg w-full lg:w-2/3">
             <h2 className="text-4xl font-extrabold mb-5">User Profile</h2>
             {userProfile && (
                 <div className="profile-info space-y-4">
                     <p>ID: {userProfile.id}</p>
-                    <p>Username: {userProfile.username}</p>
-                    <p>Email: {userProfile.email}</p>
-                    <p>First Name: {userProfile.firstName}</p>
-                    <p>Last Name: {userProfile.lastName}</p>
                 </div>
             )}
             {/* Use the imported ColorPicker component */}
@@ -273,6 +264,6 @@ const cmykToRgb = ( c: number, m: number, y: number, k: number ): { r: number; g
     return { r, g, b };
 };
 
-export { DashboardPage };
+export default DashboardPage;
 
 
