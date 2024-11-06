@@ -1,6 +1,8 @@
 import bcrypt from 'bcrypt'; // Assuming bcrypt is used for password hashing
 import { Request, Response } from 'express';
 import User from '../models/User';
+import { getSession } from '@auth0/nextjs-auth0';
+import { NextApiRequest, NextApiResponse } from 'next';
 import { hashPassword } from '../utils/hashPassword';
 import { toTitleCase } from '../utils/formatUtils';
 import { generateUniqueId } from '../utils/uuid';
@@ -24,66 +26,83 @@ export const getUserProfile = async ( req: Request, res: Response ) => {
         res.status( 500 ).json( { error: 'Error retrieving user profile' } );
     }
 };
+// Register user with local credentials
+export const registerUser = async ( req: Request, res: Response ): Promise<void> => {
+    const { username, email, firstName, lastName, password } = req.body;
 
-export async function registerUser(
-    fields: { element: HTMLInputElement; }[]
-): Promise<void> {
-    // Hash the password before storing it
-    const hashedPassword = await hashPassword( fields[4].element.value.trim() );
+    try {
+        // Hash the password before storing it
+        const hashedPassword = await hashPassword( password );
 
-    const newUser = await User.create( {
-        user_id: generateUniqueId(),
-        first_name: toTitleCase( fields[0].element.value.trim() ),
-        last_name: toTitleCase( fields[1].element.value.trim() ),
-        username: fields[3].element.value.trim(),
-        password_hash: hashedPassword, // Store the hashed password
-        email: fields[2].element.value.trim(),
-        created_at: new Date(),
-    } );
+        // Create a new user in the database
+        const newUser = await User.create( {
+            user_id: generateUniqueId(),
+            first_name: toTitleCase( firstName ),
+            last_name: toTitleCase( lastName ),
+            username,
+            password_hash: hashedPassword,
+            email,
+            created_at: new Date(),
+        } );
 
-    // Retrieve existing users from localStorage or initialize an empty array
-    const users: User[] = JSON.parse( localStorage.getItem( "users" ) || "[]" );
+        res.status( 201 ).json( { message: 'Registration successful', user: newUser } );
+    } catch ( error ) {
+        console.error( 'Error registering user:', error );
+        res.status( 500 ).json( { message: 'Error registering user' } );
+    }
+};
 
-    // Add the new user to the users array
-    users.push( newUser );
+// Additional Information for Social Sign-Ups
+export const completeProfile = async ( req: Request, res: Response ): Promise<void> => {
+    const { firstName, lastName, username, email } = req.body;
+    const session = await getSession( req, res );
 
-    // Save the updated users array in localStorage
-    localStorage.setItem( "users", JSON.stringify( users ) );
+    if ( !session || !session.user ) {
+        return res.status( 401 ).json( { message: 'Unauthorized' } );
+    }
 
-    // Update the UI to transition from registration to login
-    const registerSection = document.getElementById(
-        "registerSection"
-    ) as HTMLElement;
-    const loginSection = document.getElementById( "loginSection" ) as HTMLElement;
-    registerSection.style.display = "none";
-    loginSection.style.display = "block"; // Go to login after registration
-}
+    try {
+        // Update user with additional information
+        const updatedUser = await User.update(
+            { first_name: firstName, last_name: lastName, username, email },
+            { where: { user_id: session.user.sub } }
+        );
+
+        res.status( 200 ).json( { message: 'Profile completed', user: updatedUser } );
+    } catch ( error ) {
+        console.error( 'Error completing profile:', error );
+        res.status( 500 ).json( { message: 'Error completing profile' } );
+    }
+};
 
 
-export const loginUser = async ( req: Request, res: Response ): Promise<void> => {
+export const loginUser = async ( req: NextApiRequest, res: NextApiResponse ): Promise<void> => {
     const { username, password } = req.body;
 
     try {
+        // Find user by username
         const user = await User.findOne( { where: { username } } );
         if ( !user ) {
             res.status( 404 ).json( { message: 'User not found' } );
             return;
         }
 
+        // Check if password is valid
         const isPasswordValid = await bcrypt.compare( password, user.password_hash );
         if ( !isPasswordValid ) {
             res.status( 401 ).json( { message: 'Incorrect password' } );
             return;
         }
 
+        // Respond with user data
         res.status( 200 ).json( {
             message: 'Login successful',
             user: {
                 user_id: user.user_id,
                 username: user.username,
                 email: user.email,
-                firstName: toTitleCase( user.first_name ),
-                lastName: toTitleCase( user.last_name ),
+                firstName: user.first_name,
+                lastName: user.last_name,
             },
         } );
     } catch ( error ) {
@@ -91,3 +110,4 @@ export const loginUser = async ( req: Request, res: Response ): Promise<void> =>
         res.status( 500 ).json( { message: 'Internal server error' } );
     }
 };
+
