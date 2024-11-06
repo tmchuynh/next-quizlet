@@ -1,7 +1,7 @@
 import bcrypt from 'bcrypt'; // Assuming bcrypt is used for password hashing
 import { Request, Response } from 'express';
 import User from '../models/User';
-const axios = require( "axios" ).default;
+import axios from 'axios';
 
 export const getUserProfile = async ( req: Request, res: Response ) => {
     try {

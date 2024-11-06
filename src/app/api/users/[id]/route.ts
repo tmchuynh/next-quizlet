@@ -1,14 +1,14 @@
 import { NextResponse } from 'next/server';
 import User from '../../../../backend/models/User';
 
-export async function GET(req: Request, props: { params: Promise<{ id: string; }>; }) {
+export async function GET( req: Request, props: { params: Promise<{ id: string; }>; } ) {
     const params = await props.params;
     const userId = params.id;
 
     try {
         const user = await User.findOne( {
             where: { user_id: userId },
-            attributes: ['id', 'username', 'email', 'firstName', 'lastName'],
+            attributes: ['id'],
         } );
 
         if ( !user ) {

@@ -1,7 +1,7 @@
 // pages/api/dashboard-data.ts
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getSession, withApiAuthRequired, Session } from '@auth0/nextjs-auth0';
-import User from '../..//backend/models/User';  // Make sure this path points to your User model
+import User from '../../..//backend/models/User';  // Make sure this path points to your User model
 
 export default withApiAuthRequired( async function handler(
     req: NextApiRequest,
