@@ -1,5 +1,5 @@
 import session from 'express-session';
-const SequelizeStore = require( 'connect-session-sequelize' )( session.Store );
+import SequelizeStore from 'connect-session-sequelize';
 import sequelize from '../config/database';
 
 const secret = process.env.SECRET;

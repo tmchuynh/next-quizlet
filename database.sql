@@ -4,6 +4,12 @@ CREATE DATABASE IF NOT EXISTS quizlet;
 -- Use the newly created database
 USE quizlet;
 
+-- Create users table
+CREATE TABLE IF NOT EXISTS users (
+    user_id INT AUTO_INCREMENT PRIMARY KEY,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Create quizzes table
 CREATE TABLE IF NOT EXISTS quizzes (
     quiz_id INT AUTO_INCREMENT PRIMARY KEY,

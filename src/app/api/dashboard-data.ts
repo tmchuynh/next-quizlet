@@ -30,11 +30,11 @@ export default withApiAuthRequired( async function handler(
 
 async function fetchUserDashboardData(
     userId: string
-): Promise<{ id: string; username: string; email: string; firstName?: string; lastName?: string; }> {
+): Promise<{ id: string; }> {
     // Query the User model for the user data
     const user = await User.findOne( {
         where: { user_id: userId },
-        attributes: ['id', 'username', 'email', 'firstName', 'lastName'],
+        attributes: ['id'],
     } );
 
     if ( !user ) {
@@ -44,9 +44,5 @@ async function fetchUserDashboardData(
     // Return user data as dashboard data
     return {
         id: user.user_id,
-        username: user.username,
-        email: user.email,
-        firstName: user.first_name || '',
-        lastName: user.last_name || '',
     };
 }
