@@ -32,7 +32,7 @@ const ResultPage: React.FC = () => {
             total: questions.length,
             quiz: slug as string,
             difficultyLevel: parseInt( difficulty as string ),
-            date: new Date().toLocaleString(),
+            date: new Date(),
         };
 
         localStorage.setItem( pastScoresKey, JSON.stringify( [...userScores, newScore] ) );

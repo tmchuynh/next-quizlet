@@ -5,6 +5,8 @@ import React, { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useUser } from '@auth0/nextjs-auth0/client';
 import ColorPickerComponent from '../../components/ColorPicker'; // Updated import
+import iro from '@jaames/iro';
+import ColorPicker from "@jaames/iro";
 import { formatDate } from "../../utils/formatUtils";
 
 
@@ -29,7 +31,7 @@ const DashboardPage: React.FC = () => {
             if ( !user || user.sub !== params.id ) {
                 router.push( '/auth' ); // Redirect to auth if unauthorized
             } else {
-                loadUserProfile();
+                loadUserProfile( user.sub! );
             }
         }
     }, [isLoading, user, params.id] );
@@ -38,13 +40,18 @@ const DashboardPage: React.FC = () => {
         createContributionGrid( baseColor );
     }, [baseColor] );
 
-    const loadUserProfile = () => {
-        const username = sessionStorage.getItem( 'username' ) || '';
-        const email = sessionStorage.getItem( 'email' ) || '';
-        const firstName = sessionStorage.getItem( 'firstName' ) || '';
-        const lastName = sessionStorage.getItem( 'lastName' ) || '';
-
-        setUserProfile( { id: user!.sub!, username, email, firstName, lastName } );
+    const loadUserProfile = async ( userId: string ) => {
+        try {
+            const response = await fetch( `/api/users/${ userId }` );
+            if ( !response.ok ) {
+                console.error( 'Failed to load user profile' );
+                return;
+            }
+            const data = await response.json();
+            setUserProfile( data );
+        } catch ( error ) {
+            console.error( 'Error fetching user profile:', error );
+        }
     };
 
     return (
@@ -66,16 +73,8 @@ const DashboardPage: React.FC = () => {
     );
 };
 
-export const updateContributionGridColorTheme = ( baseColor: string ): void => {
-    const gridContainer = document.getElementById( 'contributionGrid' );
-    if ( gridContainer ) {
-        gridContainer.remove(); // Remove the previous grid container if it exists
-    }
-    createContributionGrid( baseColor ); // Re-create the grid with the new color
-};
-
 // Function to create the contribution grid
-const createContributionGrid = ( baseColor: string ) => {
+export const createContributionGrid = ( baseColor: string ) => {
     const gridContainer = document.getElementById( 'contributionGrid' );
     if ( !gridContainer ) return;
 
@@ -172,7 +171,7 @@ const createContributionGrid = ( baseColor: string ) => {
     container.appendChild( gridContainer ); // Append the grid to the specified container
 };
 
-function getDateWeek( date: Date | undefined ): number {
+export function getDateWeek( date: Date | undefined ): number {
     const currentDate: Date = ( typeof date === 'object' ) ? date : new Date();
     const januaryFirst: Date = new Date( currentDate.getFullYear(), 0, 1 );
     const daysToNextMonday: number = ( januaryFirst.getDay() === 1 ) ? 0 : ( 7 - januaryFirst.getDay() ) % 7;
@@ -180,6 +179,7 @@ function getDateWeek( date: Date | undefined ): number {
 
     return ( currentDate < nextMonday ) ? 52 : ( currentDate > nextMonday ? Math.ceil( ( currentDate.getTime() - nextMonday.getTime() ) / ( 24 * 3600 * 1000 ) / 7 ) : 1 );
 }
+
 
 // Function to generate a random contribution level based on stored quiz scores
 // const getContributionLevelForDate = ( date: string ): number => {
@@ -275,4 +275,6 @@ const cmykToRgb = ( c: number, m: number, y: number, k: number ): { r: number; g
     return { r, g, b };
 };
 
-export default { DashboardPage, updateContributionGridColorTheme };
+export { DashboardPage };
+
+

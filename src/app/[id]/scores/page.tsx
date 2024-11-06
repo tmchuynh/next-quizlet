@@ -1,6 +1,6 @@
 // app/[id]/scores/page.tsx
 import React, { useEffect, useState } from 'react';
-import { useRouter } from 'next/router';
+import { useSearchParams } from 'next/navigation';
 
 interface Score {
     score: number;
@@ -11,8 +11,8 @@ interface Score {
 }
 
 const ScoresPage: React.FC = () => {
-    const router = useRouter();
-    const { id } = router.query; // Get the user ID from the URL
+    const searchParams = useSearchParams();
+    const id = searchParams.get( 'id' );
     const [pastScores, setPastScores] = useState<Score[]>( [] );
     const [filteredScores, setFilteredScores] = useState<Score[]>( [] );
     const [filterQuiz, setFilterQuiz] = useState( '' );

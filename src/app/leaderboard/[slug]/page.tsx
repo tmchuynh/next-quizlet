@@ -3,7 +3,7 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 
 type LeaderboardEntry = {
     username: string;
@@ -53,8 +53,8 @@ const getLeaderboardDataByLevel = ( quizName: string ): Map<number, LeaderboardE
 };
 
 const LeaderboardPage: React.FC = () => {
-    const router = useRouter();
-    const { slug } = router.query;
+    const searchParams = useSearchParams();
+    const slug = searchParams.get( 'slug' );
     const [leaderboardData, setLeaderboardData] = useState<Map<number, LeaderboardEntry[]>>( new Map() );
 
     useEffect( () => {
