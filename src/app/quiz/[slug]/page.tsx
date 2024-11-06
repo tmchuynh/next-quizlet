@@ -17,7 +17,7 @@ const quizOptions: QuizOption[] = [
 ];
 
 const QuizDifficultyPage: React.FC<QuizDifficultyPageProps> = props => {
-    const params = use(props.params);
+    const params = props.params; // Fix: Replace `use(props.params)` with `props.params`
     const { slug } = params;
     const router = useRouter();
     const [progress, setProgress] = useState<ProgressItem[]>( [] );

@@ -1,15 +1,16 @@
-// app/page.tsx
-"use client"; // Enables client-side behavior for this file
+"use client";
 
-import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 
-export default function Home() {
+const AuthPage = () => {
     const router = useRouter();
 
     useEffect( () => {
-        router.push( '/auth' ); // Redirect to /auth
+        router.push( '/api/auth/login' );
     }, [router] );
 
-    return null; // Or add fallback content if needed
-}
+    return null; // No UI elements, immediate redirection
+};
+
+export default AuthPage;

@@ -3,7 +3,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import styles from "./styles/not-found.module.css";
+import styles from "../styles/not-found.module.css";
 
 export default function NotFound() {
     const [digits, setDigits] = useState( { first: "4", second: "0", third: "4" } );
