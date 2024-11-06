@@ -596,6 +596,10 @@ video {
   visibility: hidden;
 }
 
+.static {
+  position: static;
+}
+
 .m-1 {
   margin: 0.25rem;
 }
