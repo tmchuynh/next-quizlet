@@ -1,9 +1,22 @@
-// middleware.ts
-import { withAuth } from '@auth0/nextjs-auth0/edge';
+// src/middleware.ts
+import { NextRequest, NextResponse } from 'next/server';
+import { getSession } from '@auth0/nextjs-auth0';
 
-export default withAuth( {
-    secret: process.env.AUTH0_SECRET,
-    pages: {
-        signIn: '/auth', // Redirect unauthenticated users here
-    },
-} );
+export async function middleware( req: NextRequest ) {
+    const res = NextResponse.next();
+    const session = await getSession( req, res );
+
+    // Redirect to login if no session exists
+    if ( !session ) {
+        const url = req.nextUrl.clone();
+        url.pathname = '/auth';
+        return NextResponse.redirect( url );
+    }
+
+    // Continue to the requested route if the user is authenticated
+    return res;
+}
+
+export const config = {
+    matcher: ['/dashboard/:path*', '/protected-path/:path*'], // Add protected routes here
+};
