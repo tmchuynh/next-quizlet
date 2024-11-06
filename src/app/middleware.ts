@@ -1,30 +1,35 @@
 // src/middleware.ts
 import { NextRequest, NextResponse } from 'next/server';
-import { getSession } from '@auth0/nextjs-auth0';
 
 export async function middleware( req: NextRequest ) {
-    const res = NextResponse.next();
-
-    // Avoid session checks for static files or 404 pages
     const { pathname } = req.nextUrl;
+
+    // Allow static files and 404 pages to bypass middleware
     if ( pathname.startsWith( '/_next' ) || pathname === '/404' ) {
-        return res;
+        return NextResponse.next();
     }
 
-    // Auth0 getSession call requires NextApiRequest, not NextRequest.
-    const session = await getSession( req, res );
-
-    // Redirect to login if no session exists
-    if ( !session ) {
-        const url = req.nextUrl.clone();
-        url.pathname = '/auth';
-        return NextResponse.redirect( url );
+    // Custom 404 handling for API routes
+    if ( pathname.startsWith( '/api' ) ) {
+        // Check if the API route exists. If not, return a JSON 404 response.
+        const response = NextResponse.next();
+        response.headers.set( 'x-middleware-next', '1' ); // Allows non-existent API paths to return a 404
+        return response;
     }
 
-    // Continue to the requested route if the user is authenticated
-    return res;
+    // Check if user session exists via Auth0 cookie or redirect to login
+    const authCookie = req.cookies.get( 'auth0.is.authenticated' );
+    if ( !authCookie ) {
+        const loginUrl = req.nextUrl.clone();
+        loginUrl.pathname = '/login';
+        return NextResponse.redirect( loginUrl );
+    }
+
+    // Continue with the requested route if authenticated
+    return NextResponse.next();
 }
 
+// Specify routes to apply middleware to
 export const config = {
-    matcher: ['/dashboard/:path*', '/protected-path/:path*'], // Protected routes
+    matcher: ['/dashboard/:path*', '/protected-path/:path*', '/api/:path*'],
 };
