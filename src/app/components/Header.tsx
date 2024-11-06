@@ -3,6 +3,7 @@
 
 import Link from 'next/link';
 import { useUser } from '@auth0/nextjs-auth0/client';
+import "../styles.css";
 
 const Header = () => {
     const { user } = useUser();
