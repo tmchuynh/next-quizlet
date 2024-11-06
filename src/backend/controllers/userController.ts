@@ -60,24 +60,23 @@ export async function registerUser(
 }
 
 
-export const loginUser = async ( req: Request, res: Response ) => {
+export const loginUser = async ( req: Request, res: Response ): Promise<void> => {
     const { username, password } = req.body;
 
     try {
         const user = await User.findOne( { where: { username } } );
-
         if ( !user ) {
-            return res.status( 404 ).json( { message: 'User not found' } );
+            res.status( 404 ).json( { message: 'User not found' } );
+            return;
         }
 
-        // Assuming password_hash is stored in the user model
         const isPasswordValid = await bcrypt.compare( password, user.password_hash );
-
         if ( !isPasswordValid ) {
-            return res.status( 401 ).json( { message: 'Incorrect password' } );
+            res.status( 401 ).json( { message: 'Incorrect password' } );
+            return;
         }
 
-        return res.status( 200 ).json( {
+        res.status( 200 ).json( {
             message: 'Login successful',
             user: {
                 user_id: user.user_id,
@@ -87,9 +86,8 @@ export const loginUser = async ( req: Request, res: Response ) => {
                 lastName: toTitleCase( user.last_name ),
             },
         } );
-
     } catch ( error ) {
         console.error( 'Error logging in user:', error );
-        return res.status( 500 ).json( { message: 'Internal server error' } );
+        res.status( 500 ).json( { message: 'Internal server error' } );
     }
 };
