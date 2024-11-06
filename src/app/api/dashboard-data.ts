@@ -1,10 +1,15 @@
 // pages/api/dashboard-data.ts
 import { NextApiRequest, NextApiResponse } from 'next';
-import { getSession, Session } from '@auth0/nextjs-auth0';
+import { getSession, withApiAuthRequired, Session } from '@auth0/nextjs-auth0';
+import User from '../..//backend/models/User';  // Make sure this path points to your User model
 
-export default async function handler( req: NextApiRequest, res: NextApiResponse ) {
-    const session: Session | null | undefined = await getSession( req, res )!;
-    if ( !session ) {
+export default withApiAuthRequired( async function handler(
+    req: NextApiRequest,
+    res: NextApiResponse
+) {
+    // Retrieve session info from Auth0
+    const session = await getSession( req, res ) as Session;
+    if ( !session || !session.user ) {
         return res.status( 401 ).json( { error: 'Unauthorized' } );
     }
 
@@ -14,15 +19,34 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
     }
 
     try {
-        // Fetch or create user-specific data here
+        // Fetch the dashboard data for the user
         const dashboardData = await fetchUserDashboardData( userId );
-        res.status( 200 ).json( dashboardData );
+        return res.status( 200 ).json( dashboardData );
     } catch ( error ) {
-        res.status( 500 ).json( { error: 'Failed to retrieve dashboard data' } );
+        console.error( 'Error retrieving dashboard data:', error );
+        return res.status( 500 ).json( { error: 'Failed to retrieve dashboard data' } );
     }
-}
+} );
 
-async function fetchUserDashboardData( userId: string ): Promise<{ message: string; }> {
-    // Mocking data retrieval
-    return { message: `Data for user ${ userId }` };
+async function fetchUserDashboardData(
+    userId: string
+): Promise<{ id: string; username: string; email: string; firstName?: string; lastName?: string; }> {
+    // Query the User model for the user data
+    const user = await User.findOne( {
+        where: { user_id: userId },
+        attributes: ['id', 'username', 'email', 'firstName', 'lastName'],
+    } );
+
+    if ( !user ) {
+        throw new Error( `User with ID ${ userId } not found` );
+    }
+
+    // Return user data as dashboard data
+    return {
+        id: user.user_id,
+        username: user.username,
+        email: user.email,
+        firstName: user.first_name || '',
+        lastName: user.last_name || '',
+    };
 }
