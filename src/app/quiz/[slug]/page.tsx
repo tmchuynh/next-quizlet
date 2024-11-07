@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState, useEffect, use } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation'; // use `next/navigation` for App Router
-import { QuizOption, ProgressItem, Score } from '../../types';
+import { ProgressItem, Score } from '../../types';
 
 interface QuizDifficultyPageProps {
     params: {
@@ -10,44 +10,42 @@ interface QuizDifficultyPageProps {
     };
 }
 
-const quizOptions: QuizOption[] = [
-    { id: 'quiz1', label: 'Math Quiz', category: 'Math' },
-    { id: 'quiz2', label: 'Science Quiz', category: 'Science' },
-    { id: 'quiz3', label: 'History Quiz', category: 'History' },
-];
-
-const QuizDifficultyPage: React.FC<QuizDifficultyPageProps> = props => {
-    const params = props.params; // Fix: Replace `use(props.params)` with `props.params`
-    const { slug } = params;
+const QuizDifficultyPage: React.FC<QuizDifficultyPageProps> = ( { params } ) => {
+    const { slug: quizId } = params;
     const router = useRouter();
     const [progress, setProgress] = useState<ProgressItem[]>( [] );
     const [userScores, setUserScores] = useState<Score[]>( [] );
-    const [selectedQuiz, setSelectedQuiz] = useState<QuizOption | undefined>();
-    const quizType = typeof window !== 'undefined' ? sessionStorage.getItem( 'quizType' ) : '';
+    const [quizData, setQuizData] = useState<any>( null );
+    const [difficultyLevels, setDifficultyLevels] = useState<number[]>( [] );
 
     useEffect( () => {
-        if ( typeof window === 'undefined' ) return;
+        const fetchQuizDetails = async () => {
+            try {
+                const response = await fetch( `/api/quiz-details?quizId=${ quizId }`, {
+                    method: 'GET',
+                } );
+                if ( response.ok ) {
+                    const data = await response.json();
+                    setQuizData( data.quiz );
+                    setDifficultyLevels( data.levels );
+                    setProgress( data.progress || [] );
+                    setUserScores( data.scores || [] );
+                } else {
+                    console.error( 'Failed to fetch quiz details:', response.status );
+                }
+            } catch ( error ) {
+                console.error( 'Error fetching quiz details:', error );
+            }
+        };
 
-        const quiz = quizOptions.find( ( q ) => q.label === slug );
-        if ( quiz ) {
-            setSelectedQuiz( quiz );
-            sessionStorage.setItem( 'quizId', quiz.id );
-        }
 
-        const currentUserId = sessionStorage.getItem( 'currentUserId' );
-        const progressKey = `quizProgress_${ currentUserId }`;
-        const userProgress = JSON.parse( localStorage.getItem( progressKey ) || '[]' );
-        setProgress( userProgress );
-
-        const scoresKey = `quizScores_${ currentUserId }`;
-        const scores = JSON.parse( localStorage.getItem( scoresKey ) || '[]' );
-        setUserScores( scores );
-    }, [slug] );
+        fetchQuizDetails();
+    }, [quizId] );
 
     const getButtonClass = ( level: number ): string => {
         const isInProgress = progress.some(
             ( item ) =>
-                item.quizId === selectedQuiz?.id &&
+                item.quizId === quizId &&
                 item.currentQuestion > 0 &&
                 item.difficultyLevel === level
         );
@@ -55,43 +53,24 @@ const QuizDifficultyPage: React.FC<QuizDifficultyPageProps> = props => {
     };
 
     const handleDifficultySelection = ( level: number ) => {
-        if ( !selectedQuiz?.id ) return;
-
+        if ( !quizId ) return;
         sessionStorage.setItem( 'difficultyLevel', level.toString() );
-        setupQuizData( selectedQuiz.id, level );
+        router.push( `/quiz/${ quizId }/questions` );
     };
-
-    const setupQuizData = ( quizId: string, difficultyLevel: number ) => {
-        const quizData = JSON.parse( sessionStorage.getItem( 'currentQuizData' ) || '[]' );
-        if ( !quizData || !quizData[difficultyLevel] ) return;
-
-        const questions = quizData[difficultyLevel];
-        const shuffledQuestions = questions.map( ( q: any ) => ( {
-            ...q,
-            answers: shuffle( q.answers ),
-        } ) );
-
-        sessionStorage.setItem( 'currentQuizData', JSON.stringify( shuffledQuestions ) );
-        sessionStorage.setItem( 'totalQuestions', questions.length.toString() );
-
-        router.push( `/quiz/${ slug }/questions` );
-    };
-
-    const shuffle = ( array: any[] ) => array.sort( () => Math.random() - 0.5 );
 
     const getHighestScoreForLevel = ( level: number ) => {
         return userScores
-            .filter( ( score ) => score.quiz === selectedQuiz?.label && score.difficultyLevel === level )
+            .filter( ( score ) => score.quiz === quizId && score.difficultyLevel === level )
             .reduce( ( max, score ) => Math.max( max, score.score ), 0 );
     };
 
     return (
         <div className="flex flex-col min-h-full justify-center px-6 py-4 lg:px-8 container border-4 border-gray-200 dark:border-gray-100 dark:bg-gray-800 dark:text-white rounded-2xl mx-auto my-4 w-full lg:w-11/12">
             <h2 className="text-center text-4xl py-5 font-extrabold dark:text-white">
-                Select Difficulty Level for <br /> {quizType}
+                Select Difficulty Level for <br /> {quizData ? quizData.title : 'Loading...'}
             </h2>
             <div id="difficultyOptions" className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 p-3">
-                {[1, 2, 3, 4, 5].map( ( level ) => (
+                {difficultyLevels.map( ( level ) => (
                     <button
                         key={level}
                         onClick={() => handleDifficultySelection( level )}

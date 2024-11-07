@@ -67,7 +67,7 @@ const QuizSelectionPage: React.FC = () => {
             console.error( 'Error updating quiz progress:', error );
         }
 
-        router.push( `/quiz/${ quizId }/difficulty` );
+        router.push( `/quiz/difficulty/${ quizId }` );
     };
 
 
