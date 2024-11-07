@@ -14,8 +14,12 @@ export default function RootLayout( {
 }: {
     children: React.ReactNode;
 } ) {
-    const clientID = process.env.NEXT_PUBLIC_AUTH0_CLIENT_ID || "YOUR_FALLBACK_CLIENT_ID";
-    const domain = process.env.NEXT_PUBLIC_AUTH0_DOMAIN || "YOUR_FALLBACK_DOMAIN";
+    const clientID = process.env.NEXT_PUBLIC_AUTH0_CLIENT_ID || "";
+    const domain = process.env.NEXT_PUBLIC_AUTH0_DOMAIN || "";
+    const auth0Tenant = process.env.AUTH0_TENANT || "";
+    const authorizationServer = {
+        issuer: process.env.CUSTOM_DOMAIN || ""
+    };
 
     useEffect( () => {
         const loadAuth0Script = () => {
@@ -43,6 +47,10 @@ export default function RootLayout( {
                         redirectUri: `${ process.env.AUTH0_BASE_URL }/api/auth/callback`,
                         responseType: "token id_token",
                         scope: "openid profile email",
+                        overrides: {
+                            __tenant: auth0Tenant,
+                            __token_issuer: authorizationServer.issuer
+                        },
                     } );
 
                     try {
