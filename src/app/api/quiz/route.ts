@@ -9,13 +9,8 @@ import { NextResponse } from 'next/server';
 export async function GET() {
     try {
         const quizzes = await Quiz.findAll( {
-            attributes: ['quiz_id', 'title', 'description'],
+            attributes: ['quiz_id', 'title', 'description']
         } );
-
-        if ( !quizzes.length ) {
-            return NextResponse.json( { message: 'No quizzes found' }, { status: 404 } );
-        }
-
         return NextResponse.json( quizzes );
     } catch ( error ) {
         console.error( 'Error fetching quiz data:', error );
@@ -28,7 +23,7 @@ export async function GET() {
  * @param userId - The user ID for which to fetch progress.
  * @returns {Promise<{quiz_id: number, current_question_index: number, score: number, completed: boolean, date_completed: Date | null}[]>}
  */
-export async function getUserQuizProgress( userId: string ) {
+export async function getUserQuizProgress( userId: string ): Promise<UserQuizProgress[]> {
     try {
         const progress = await UserQuizProgress.findAll( {
             where: { user_id: userId },

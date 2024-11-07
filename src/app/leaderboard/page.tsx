@@ -15,8 +15,8 @@ const LeaderboardSelectionPage: React.FC = () => {
         const fetchQuizNames = async () => {
             if ( user && user.sub ) {
                 try {
-                    const response = await fetch( `/api/scores?userId=${ encodeURIComponent( user.sub ) }` );
-                    if ( response.ok ) {
+                    const response = await fetch( "/api/quiz " );
+                    if ( response ) {
                         const data = await response.json();
                         setQuizNames( data );
                     } else {

@@ -1,6 +1,6 @@
-import { DataTypes, Model, Association } from 'sequelize';
+import { DataTypes, Model } from 'sequelize';
 import sequelize from '../config/database';
-import Quiz from './Quiz';
+import Quiz from './Quiz'; // Ensure this path is correct
 
 class Score extends Model {
     public score_id!: number;
@@ -9,10 +9,6 @@ class Score extends Model {
     public score!: number;
     public total_questions!: number;
     public quiz_date!: Date;
-
-    public static associations: {
-        quiz: Association<Score, Quiz>;
-    };
 }
 
 Score.init(

@@ -3,6 +3,9 @@ import express from 'express';
 import dotenv from 'dotenv';
 import sequelize from './config/database';
 import userRoutes from '../backend/routes/userRoutes';
+import setupAssociations from './associations';
+import './models/Score';
+import './models/Quiz';
 
 dotenv.config();
 
@@ -19,6 +22,8 @@ sequelize
 
 // Attach routes
 app.use( '/api/users', userRoutes );
+
+setupAssociations();
 
 // Start the server
 app.listen( PORT, () => {

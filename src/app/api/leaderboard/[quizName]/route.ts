@@ -15,7 +15,7 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
                 {
                     model: Quiz,
                     where: { title: quizName },
-                    as: "Score",
+                    as: "quiz",
                     attributes: ['quiz_id', 'title', 'level'],
                 },
             ],
@@ -25,7 +25,6 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
             user_id: score.user_id,
             quiz_id: score.quiz_id,
             score: ( score.score / score.total_questions ) * 100,
-            level: score.Quiz?.level,
             date: score.quiz_date,
         } ) );
 

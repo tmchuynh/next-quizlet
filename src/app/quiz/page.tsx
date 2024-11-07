@@ -9,7 +9,7 @@ import { QuizOption, ProgressItem } from '../types/index';
 const QuizSelectionPage: React.FC = () => {
     const router = useRouter();
     const [quizOptions, setQuizOptions] = useState<QuizOption[]>( [] );
-    const [quizProgress, setQuizProgress] = useState<ProgressItem[]>( [] );
+    const [quizProgress] = useState<ProgressItem[]>( [] );
     const { user, isLoading } = useUser();
 
     useEffect( () => {

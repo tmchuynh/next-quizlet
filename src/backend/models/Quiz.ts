@@ -1,16 +1,11 @@
-import { DataTypes, Model, Association } from 'sequelize';
+import { DataTypes, Model } from 'sequelize';
 import sequelize from '../config/database';
-import Score from './Score';
 
 class Quiz extends Model {
     public quiz_id!: number;
     public title!: string;
     public description!: string;
     public level!: number;
-
-    public static associations: {
-        scores: Association<Quiz, Score>;
-    };
 }
 
 Quiz.init(
