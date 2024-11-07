@@ -1,42 +1,39 @@
-// models/Quiz.ts
-
 import { DataTypes, Model } from 'sequelize';
 import sequelize from '../config/database';
 
 class Quiz extends Model {
-    quiz_id!: number;
-    title!: string;
-    description!: string;
-    level!: number;
-    created_at!: Date;
+    public quiz_id!: number;
+    public title!: string;
+    public level!: number;
+    public description?: string;
 }
 
-Quiz.init( {
-    quiz_id: {
-        type: DataTypes.INTEGER,
-        autoIncrement: true,
-        primaryKey: true,
+Quiz.init(
+    {
+        quiz_id: {
+            type: DataTypes.INTEGER,
+            autoIncrement: true,
+            primaryKey: true,
+        },
+        title: {
+            type: DataTypes.STRING,
+            allowNull: false,
+        },
+        level: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+        },
+        description: {
+            type: DataTypes.TEXT,
+            allowNull: true,
+        },
     },
-    title: {
-        type: DataTypes.STRING( 100 ),
-        allowNull: false,
-    },
-    description: {
-        type: DataTypes.TEXT,
-        allowNull: true,
-    },
-    level: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-    },
-    created_at: {
-        type: DataTypes.DATE,
-        defaultValue: DataTypes.NOW,
-    },
-}, {
-    sequelize,
-    modelName: 'Quiz',
-    timestamps: false,
-} );
+    {
+        sequelize,
+        modelName: 'Quiz',
+        tableName: 'quizzes',
+        timestamps: false,
+    }
+);
 
 export default Quiz;

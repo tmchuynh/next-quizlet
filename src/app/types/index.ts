@@ -7,6 +7,7 @@ export interface ProgressItem {
     currentQuestion: number;
     score: number;
     quizId: string;
+    level: number;
     difficultyLevel: number;
 }
 

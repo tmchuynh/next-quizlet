@@ -2,6 +2,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import { useUser } from '@auth0/nextjs-auth0/client';
 import { useRouter } from 'next/navigation';
 import { QuizOption, ProgressItem } from '../types/index';
 
@@ -9,41 +10,57 @@ const QuizSelectionPage: React.FC = () => {
     const router = useRouter();
     const [quizOptions, setQuizOptions] = useState<QuizOption[]>( [] );
     const [quizProgress, setQuizProgress] = useState<ProgressItem[]>( [] );
-    const [user, setUser] = useState<any>( null );
-    const [isLoading, setIsLoading] = useState( true );
+    const { user, isLoading } = useUser();
 
     useEffect( () => {
-        loadData();
-    }, [router] );
+        const fetchQuizData = async () => {
+            try {
+                const response = await fetch( '/api/quiz-data' );
+                if ( !response.ok ) {
+                    throw new Error( 'Failed to fetch quiz data' );
+                }
+                const data = await response.json();
+                setQuizOptions( data );
+            } catch ( error ) {
+                console.error( 'Error fetching quiz data:', error );
+            }
+        };
 
-    const loadData = async () => {
+        fetchQuizData();
+    }, [] );
+
+
+    const handleQuizSelection = async ( quizId: string ) => {
+        sessionStorage.setItem( 'quizId', quizId );
+        const quizLabel = quizOptions.find( ( quiz ) => quiz.id === quizId )?.label || '';
+        sessionStorage.setItem( 'quizType', quizLabel );
+
         try {
-            const response = await fetch( '/api/quiz-data' );
-            if ( !response.ok ) throw new Error( 'Failed to fetch data' );
-            const { quizzes, user, progress } = await response.json();
+            const response = await fetch( '/api/update-quiz-progress', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify( {
+                    userId: user?.sub,
+                    quizId: quizId,
+                    currentQuestionIndex: 0,
+                    score: 0,
+                    completed: false,
+                } ),
+            } );
 
-            setQuizOptions( quizzes );
-            setQuizProgress( progress );
-            setUser( user );
-            setIsLoading( false );
-
-            if ( !user ) {
-                router.push( '/login' );  // Redirect if no user data
+            if ( !response.ok ) {
+                throw new Error( 'Failed to update quiz progress' );
             }
         } catch ( error ) {
-            console.error( 'Error loading data:', error );
+            console.error( 'Error updating quiz progress:', error );
         }
-    };
-
-
-    const handleQuizSelection = ( quizId: string ) => {
-        sessionStorage.setItem( 'quizId', quizId );
-        const quizType = quizOptions.find( ( q ) => q.id === quizId )?.label || '';
-        sessionStorage.setItem( 'quizType', quizType );
 
         // Navigate to the difficulty selection page
         router.push( `/quiz/${ quizId }/difficulty` );
     };
+
 
     const getButtonClass = ( quizId: string ): string => {
         const inProgress = quizProgress.some( ( item ) => item.quizId === quizId && item.currentQuestion > 0 );

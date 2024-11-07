@@ -1,41 +1,38 @@
-// src/app/api/quiz-data/route.ts
-import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
-import User from '../../../backend/models/User';
 import Quiz from '../../../backend/models/Quiz';
 import UserQuizProgress from '../../../backend/models/UserQuizProgress';
-import axios from 'axios';
+import { NextResponse } from 'next/server';
 
+/**
+ * Fetches all quiz titles and descriptions.
+ * @returns {Promise<{quiz_id: number, title: string, description: string}[]>}
+ */
 export async function GET() {
     try {
-        // Get the Auth0 session token from cookies
-        const auth0Token = ( await cookies() ).get( 'auth0.is.authenticated' )?.value;
-
-        // Ensure the token is available
-        if ( !auth0Token ) {
-            return NextResponse.json( { error: 'Unauthorized' }, { status: 401 } );
-        }
-
-        // Fetch user data from the Auth0 Management API
-        const auth0UserResponse = await axios.get( `https://${ process.env.NEXT_PUBLIC_AUTH0_DOMAIN }/userinfo`, {
-            headers: { Authorization: `Bearer ${ auth0Token }` },
+        const quizzes = await Quiz.findAll( {
+            attributes: ['quiz_id', 'title', 'description'],
         } );
 
-        const auth0User = auth0UserResponse.data;
-        const userId = auth0User.sub;
-
-        // Fetch quizzes, user info, and progress data from the database
-        const quizzes = await Quiz.findAll();
-        const user = await User.findOne( { where: { user_id: userId } } );
-        const progress = await UserQuizProgress.findAll( { where: { userId: user?.user_id } } );
-
-        if ( !user ) {
-            return NextResponse.json( { error: 'User not found' }, { status: 404 } );
-        }
-
-        return NextResponse.json( { quizzes, user, progress } );
+        return NextResponse.json( quizzes );
     } catch ( error ) {
-        console.error( 'Error retrieving quiz data:', error );
-        return NextResponse.json( { error: 'Failed to retrieve data' }, { status: 500 } );
+        console.error( 'Error fetching quiz data:', error );
+        return NextResponse.json( { error: 'Failed to fetch quiz data' }, { status: 500 } );
+    }
+}
+
+/**
+ * Fetches quiz progress for a specific user.
+ * @param userId - The user ID for which to fetch progress.
+ * @returns {Promise<{quiz_id: number, current_question_index: number, score: number, completed: boolean, date_completed: Date | null}[]>}
+ */
+export async function getUserQuizProgress( userId: string ) {
+    try {
+        const progress = await UserQuizProgress.findAll( {
+            where: { user_id: userId },
+            attributes: ['quiz_id', 'current_question_index', 'score', 'completed', 'date_completed'], // Only fetch necessary columns
+        } );
+        return progress;
+    } catch ( error ) {
+        console.error( 'Error fetching user quiz progress:', error );
+        throw new Error( 'Failed to fetch quiz progress' );
     }
 }
