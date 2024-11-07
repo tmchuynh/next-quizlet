@@ -69,7 +69,11 @@ export interface QuizItem {
 }
 
 export interface Quiz {
-    [difficultyLevel: number]: Question[]; // Difficulty levels from 1 to 5
+    quiz_id: string;
+    title: string;
+    description: string;
+    level: number;
+    created_at: Date;
 }
 
 export interface QuizOption {

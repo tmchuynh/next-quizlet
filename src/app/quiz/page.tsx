@@ -4,39 +4,48 @@
 import React, { useEffect, useState } from 'react';
 import { useUser } from '@auth0/nextjs-auth0/client';
 import { useRouter } from 'next/navigation';
-import { QuizOption, ProgressItem } from '../types/index';
+import { QuizOption, ProgressItem, Quiz } from '../types/index';
 
 const QuizSelectionPage: React.FC = () => {
     const router = useRouter();
-    const [quizOptions, setQuizOptions] = useState<QuizOption[]>( [] );
+    const [quizOptions, setQuizOptions] = useState<Quiz[]>( [] );
     const [quizProgress] = useState<ProgressItem[]>( [] );
+    const [quizNames, setQuizNames] = useState<string[]>( [] );
     const { user, isLoading } = useUser();
 
     useEffect( () => {
-        const fetchQuizData = async () => {
-            try {
-                const response = await fetch( '/api/quiz-data' );
-                if ( !response.ok ) {
-                    throw new Error( 'Failed to fetch quiz data' );
+        const fetchQuizNames = async () => {
+            if ( user && user.sub ) {
+                try {
+                    const response = await fetch( "/api/quiz" );
+                    if ( response.ok ) {
+                        const data: { title: string; }[] = await response.json();
+                        console.log( 'Fetched quiz names:', data );
+
+                        // Extract unique quiz titles using reduce
+                        const uniqueTitles = data
+                            .map( quiz => quiz.title )
+                            .filter( ( title, index, self ) => self.indexOf( title ) === index );
+
+                        console.log( 'Filtered quiz titles:', uniqueTitles );
+                        setQuizNames( uniqueTitles );
+                    } else {
+                        console.error( 'Failed to fetch quiz names: HTTP status', response.status );
+                    }
+                } catch ( error ) {
+                    console.error( 'Error fetching quiz names:', error );
                 }
-                const data = await response.json();
-                setQuizOptions( data );
-            } catch ( error ) {
-                console.error( 'Error fetching quiz data:', error );
             }
         };
 
-        fetchQuizData();
-    }, [] );
+        fetchQuizNames();
+    }, [user] );
 
-
-    const handleQuizSelection = async ( quizId: string ) => {
-        sessionStorage.setItem( 'quizId', quizId );
-        const quizLabel = quizOptions.find( ( quiz ) => quiz.id === quizId )?.label || '';
-        sessionStorage.setItem( 'quizType', quizLabel );
+    const handleQuizSelection = async ( quizName: string ) => {
+        const quizId = quizOptions.find( ( quiz ) => quiz.title === quizName )?.quiz_id || '';
 
         try {
-            const response = await fetch( '/api/update-quiz-progress', {
+            const response = await fetch( '/api/user-progress', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -50,6 +59,7 @@ const QuizSelectionPage: React.FC = () => {
                 } ),
             } );
 
+
             if ( !response.ok ) {
                 throw new Error( 'Failed to update quiz progress' );
             }
@@ -57,7 +67,6 @@ const QuizSelectionPage: React.FC = () => {
             console.error( 'Error updating quiz progress:', error );
         }
 
-        // Navigate to the difficulty selection page
         router.push( `/quiz/${ quizId }/difficulty` );
     };
 
@@ -75,13 +84,13 @@ const QuizSelectionPage: React.FC = () => {
         <div className="flex flex-col min-h-full justify-center items-center px-6 py-4 lg:px-8 container border-4 border-gray-200 dark:border-gray-100 dark:bg-gray-800 dark:text-white rounded-2xl mx-auto my-4 w-full lg:w-11/12">
             <h2 className="text-center text-4xl py-5 font-extrabold dark:text-white">Select a Quiz</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-3 w-full">
-                {quizOptions.map( ( quiz ) => (
+                {quizNames.map( ( quizName, index ) => (
                     <button
-                        key={quiz.id}
-                        onClick={() => handleQuizSelection( quiz.id )}
-                        className={`button text-white ${ getButtonClass( quiz.id ) } focus:ring-4 focus:outline-none font-medium rounded-lg text-md w-full sm:w-auto px-5 py-2.5 text-center`}
+                        key={index}
+                        onClick={() => handleQuizSelection( quizName )}
+                        className={`button text-white ${ getButtonClass( quizName ) } focus:ring-4 focus:outline-none font-medium rounded-lg text-md w-full sm:w-auto px-5 py-2.5 text-center`}
                     >
-                        {quiz.label}
+                        {quizName}
                     </button>
                 ) )}
             </div>
