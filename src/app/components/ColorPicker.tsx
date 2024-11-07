@@ -1,7 +1,7 @@
 // components/ColorPicker.tsx
 import React, { useEffect, useRef } from 'react';
 import iro from '@jaames/iro';
-import { createContributionGrid } from '../[id]/dashboard/page';
+import { createContributionGrid } from './ContributionsGrid';
 
 interface ColorPickerProps {
     onColorChange: ( color: string ) => void;
