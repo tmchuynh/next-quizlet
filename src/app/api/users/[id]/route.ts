@@ -8,8 +8,7 @@ export async function GET( req: Request, props: { params: Promise<{ id: string; 
 
     try {
         const user = await User.findOne( {
-            where: { user_id: userId },
-            attributes: ['user_id'],
+            where: { user_id: userId }
         } );
 
         if ( !user ) {
