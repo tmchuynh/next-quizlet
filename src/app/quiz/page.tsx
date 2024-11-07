@@ -42,9 +42,14 @@ const QuizSelectionPage: React.FC = () => {
     }, [user] );
 
     const handleQuizSelection = async ( quizName: string ) => {
-        const quizId = quizNames.find( ( quiz ) => quiz === quizName ) || '';
+        const quizTitle = quizNames.find( ( quiz ) => quiz === quizName ) || '';
 
-        console.log( 'Selected quiz:', quizId );
+        console.log( 'Selected quiz:', quizTitle );
+
+        if ( !user?.sub || !quizTitle ) {
+            console.error( 'User ID or quiz title is missing' );
+            return;
+        }
 
         try {
             const response = await fetch( '/api/user-progress', {
@@ -53,23 +58,24 @@ const QuizSelectionPage: React.FC = () => {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify( {
-                    userId: user?.sub,
-                    quizId: quizId,
+                    userId: user.sub, // Ensure this is defined and correct
+                    title: quizTitle, // Pass the correct quiz title
                     currentQuestionIndex: 0,
                     score: 0,
                     completed: false,
                 } ),
             } );
 
-
             if ( !response.ok ) {
+                const errorData = await response.json();
+                console.error( 'Server responded with error:', errorData );
                 throw new Error( 'Failed to update quiz progress' );
             }
+
+            router.push( `/quiz/${ quizTitle }/difficulty/` );
         } catch ( error ) {
             console.error( 'Error updating quiz progress:', error );
         }
-
-        router.push( `/quiz/${ quizId }/difficulty/` );
     };
 
 

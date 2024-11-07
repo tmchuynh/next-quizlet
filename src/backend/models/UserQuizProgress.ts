@@ -58,6 +58,7 @@ UserQuizProgress.init( {
 }, {
     sequelize,
     modelName: 'UserQuizProgress',
+    tableName: 'user_quiz_progress',
     timestamps: false,
 } );
 

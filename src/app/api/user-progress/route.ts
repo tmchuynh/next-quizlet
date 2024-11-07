@@ -1,42 +1,37 @@
-import type { NextApiRequest, NextApiResponse } from 'next';
 import { NextResponse } from 'next/server';
 import UserQuizProgress from '../../../backend/models/UserQuizProgress';
 
 // Export the POST method
-export async function POST( req: Request ) {
+export async function POST( request: Request ) {
     try {
-        const body = await req.json(); // Parse the request body
-        const { userId, quizId, currentQuestionIndex, score, completed } = body;
+        const body = await request.json();
+        const { userId, title, currentQuestionIndex, score, completed } = body;
 
-        if ( !userId || !quizId ) {
-            return NextResponse.json( { error: 'User ID and Quiz ID are required' }, { status: 400 } );
+        // Validate required fields
+        if ( !userId || !title ) {
+            return NextResponse.json( { error: 'User ID and title are required' }, { status: 400 } );
         }
 
-        // Find existing progress
+        // Process logic to create or update user progress
         const progress = await UserQuizProgress.findOne( {
-            where: {
-                user_id: userId,
-                quiz_id: parseInt( quizId, 10 ),
-            },
+            where: { user_id: userId, title },
         } );
 
         if ( progress ) {
-            // Update existing progress
             await progress.update( { current_question_index: currentQuestionIndex, score, completed } );
-            return NextResponse.json( { message: 'Progress updated successfully', progress }, { status: 200 } );
+            return NextResponse.json( { message: 'Progress updated successfully' } );
         } else {
-            // Create new progress
             const newProgress = await UserQuizProgress.create( {
                 user_id: userId,
-                quiz_id: parseInt( quizId, 10 ),
+                title,
                 current_question_index: currentQuestionIndex,
                 score,
                 completed,
             } );
-            return NextResponse.json( { message: 'Progress created successfully', progress: newProgress }, { status: 201 } );
+            return NextResponse.json( { message: 'Progress created successfully', progress: newProgress } );
         }
     } catch ( error ) {
-        console.error( 'Error handling user progress:', error );
+        console.error( 'Error processing user progress:', error );
         return NextResponse.json( { error: 'Internal Server Error' }, { status: 500 } );
     }
 }
