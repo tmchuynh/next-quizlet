@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS quizzes (
     quiz_id INT AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(100) NOT NULL,
     description TEXT,
-    level INT NOT NULL, -- Level of the quiz
+    level INT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS questions (
         'true_false',
         'written'
     ) NOT NULL,
-    level INT NOT NULL, -- Level of the question
+    level INT NOT NULL,
     FOREIGN KEY (quiz_id) REFERENCES quizzes (quiz_id) ON DELETE CASCADE
 );
 
@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS answers (
     answer_id INT AUTO_INCREMENT PRIMARY KEY,
     question_id INT NOT NULL,
     answer_text TEXT NOT NULL,
-    is_correct BOOLEAN NOT NULL, -- Indicates if this answer is correct
+    is_correct BOOLEAN NOT NULL,
     FOREIGN KEY (question_id) REFERENCES questions (question_id) ON DELETE CASCADE
 );
 
@@ -59,7 +59,7 @@ CREATE TABLE IF NOT EXISTS user_quiz_progress (
 CREATE TABLE IF NOT EXISTS user_activity (
     activity_id INT AUTO_INCREMENT PRIMARY KEY,
     user_id VARCHAR(250) NOT NULL,
-    quiz_date DATE NOT NULL, -- Renamed from DATE to quiz_date
+    quiz_date DATE NOT NULL,
     quizzes_completed INT DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users (user_id) ON DELETE CASCADE
@@ -72,7 +72,7 @@ CREATE TABLE IF NOT EXISTS scores (
     quiz_id INT NOT NULL,
     score INT NOT NULL,
     total_questions INT NOT NULL,
-    quiz_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Renamed from DATE to quiz_date
+    quiz_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users (user_id) ON DELETE CASCADE,
     FOREIGN KEY (quiz_id) REFERENCES quizzes (quiz_id) ON DELETE CASCADE
 );
