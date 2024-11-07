@@ -9,13 +9,32 @@ import { NextResponse } from 'next/server';
 export async function GET() {
     try {
         const quizzes = await Quiz.findAll( {
-            attributes: ['quiz_id', 'title', 'description']
+            attributes: ['title']
         } );
+
         return NextResponse.json( quizzes );
     } catch ( error ) {
         console.error( 'Error fetching quiz data:', error );
         return NextResponse.json( { error: 'Failed to fetch quiz data' }, { status: 500 } );
     }
+}
+
+function uniq<T extends Quiz | number>( a: T[] ): T[] {
+    const prims: { [key: string]: { [key: string]: boolean; }; } = {
+        boolean: {},
+        number: {},
+        string: {},
+    };
+    const objs: T[] = [];
+
+    return a.filter( ( item: T ) => {
+        const type = typeof item;
+        if ( type in prims ) {
+            return prims[type].hasOwnProperty( String( item ) ) ? false : ( prims[type][String( item )] = true );
+        } else {
+            return objs.indexOf( item ) >= 0 ? false : objs.push( item );
+        }
+    } );
 }
 
 /**

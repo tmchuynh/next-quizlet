@@ -15,12 +15,20 @@ const LeaderboardSelectionPage: React.FC = () => {
         const fetchQuizNames = async () => {
             if ( user && user.sub ) {
                 try {
-                    const response = await fetch( "/api/quiz " );
-                    if ( response ) {
-                        const data = await response.json();
-                        setQuizNames( data );
+                    const response = await fetch( "/api/quiz" );
+                    if ( response.ok ) {
+                        const data: { title: string; }[] = await response.json();
+                        console.log( 'Fetched quiz names:', data );
+
+                        // Extract unique quiz titles using reduce
+                        const uniqueTitles = data
+                            .map( quiz => quiz.title )
+                            .filter( ( title, index, self ) => self.indexOf( title ) === index );
+
+                        console.log( 'Filtered quiz titles:', uniqueTitles );
+                        setQuizNames( uniqueTitles );
                     } else {
-                        console.error( 'Failed to fetch quiz names' );
+                        console.error( 'Failed to fetch quiz names: HTTP status', response.status );
                     }
                 } catch ( error ) {
                     console.error( 'Error fetching quiz names:', error );
@@ -40,9 +48,9 @@ const LeaderboardSelectionPage: React.FC = () => {
             <h2 className="text-4xl font-extrabold mb-5 text-center">Select a Quiz to View Leaderboard</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 {quizNames.length > 0 ? (
-                    quizNames.map( ( quizName ) => (
+                    quizNames.map( ( quizName, index ) => (
                         <button
-                            key={quizName}
+                            key={index}
                             onClick={() => handleQuizSelection( quizName )}
                             className="text-white bg-green-700 hover:bg-green-800 rounded-lg px-5 py-2.5"
                         >
@@ -50,7 +58,7 @@ const LeaderboardSelectionPage: React.FC = () => {
                         </button>
                     ) )
                 ) : (
-                    <p className="text-gray-400 mx-auto" >No quizzes found for this user.</p>
+                    <p className="text-gray-400 mx-auto">No quizzes found for this user.</p>
                 )}
             </div>
         </div>
