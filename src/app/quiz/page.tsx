@@ -42,7 +42,9 @@ const QuizSelectionPage: React.FC = () => {
     }, [user] );
 
     const handleQuizSelection = async ( quizName: string ) => {
-        const quizId = quizOptions.find( ( quiz ) => quiz.title === quizName )?.quiz_id || '';
+        const quizId = quizNames.find( ( quiz ) => quiz === quizName ) || '';
+
+        console.log( 'Selected quiz:', quizId );
 
         try {
             const response = await fetch( '/api/user-progress', {
@@ -67,7 +69,7 @@ const QuizSelectionPage: React.FC = () => {
             console.error( 'Error updating quiz progress:', error );
         }
 
-        router.push( `/quiz/difficulty/${ quizId }` );
+        router.push( `/quiz/${ quizId }/difficulty/` );
     };
 
 
