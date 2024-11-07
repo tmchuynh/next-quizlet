@@ -3,7 +3,13 @@
 import { DataTypes, Model } from 'sequelize';
 import sequelize from '../config/database';
 
-class Quiz extends Model { }
+class Quiz extends Model {
+    quiz_id!: number;
+    title!: string;
+    description!: string;
+    level!: number;
+    created_at!: Date;
+}
 
 Quiz.init( {
     quiz_id: {

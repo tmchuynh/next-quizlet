@@ -4,7 +4,13 @@ import { DataTypes, Model } from 'sequelize';
 import sequelize from '../config/database';
 import User from './User';
 
-class UserActivity extends Model { }
+class UserActivity extends Model {
+    activity_id!: number;
+    user_id!: number;
+    date!: Date;
+    quizzes_completed!: number;
+    created_at!: Date;
+}
 
 UserActivity.init( {
     activity_id: {

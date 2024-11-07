@@ -5,7 +5,14 @@ import sequelize from '../config/database';
 import User from './User';
 import Quiz from './Quiz';
 
-class Score extends Model { }
+class Score extends Model {
+    score_id!: number;
+    user_id!: number;
+    quiz_id!: number;
+    score!: number;
+    total_questions!: number;
+    date!: Date;
+}
 
 Score.init( {
     score_id: {

@@ -4,7 +4,12 @@ import { DataTypes, Model } from 'sequelize';
 import sequelize from '../config/database';
 import Question from './Question';
 
-class Answer extends Model { }
+class Answer extends Model {
+    answer_id!: number;
+    question_id!: number;
+    answer_text!: string;
+    is_correct!: boolean;
+}
 
 Answer.init( {
     answer_id: {

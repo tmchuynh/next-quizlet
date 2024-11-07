@@ -10,8 +10,8 @@ type UserCreationAttributes = Optional<UserAttributes, 'created_at'>;
 
 // Define the User model class, extending the Sequelize Model
 class User extends Model<UserAttributes, UserCreationAttributes> implements UserAttributes {
-    public user_id!: string;
-    public created_at!: Date;
+    user_id!: string;
+    created_at!: Date;
 }
 
 
