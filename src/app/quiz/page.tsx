@@ -13,27 +13,27 @@ const QuizSelectionPage: React.FC = () => {
     const [isLoading, setIsLoading] = useState( true );
 
     useEffect( () => {
-        const loadData = async () => {
-            try {
-                const response = await fetch( '/api/quiz-data' );
-                if ( !response.ok ) throw new Error( 'Failed to fetch data' );
-                const { quizzes, user, progress } = await response.json();
-
-                setQuizOptions( quizzes );
-                setQuizProgress( progress );
-                setUser( user );
-                setIsLoading( false );
-
-                if ( !user ) {
-                    router.push( '/login' );  // Redirect if no user data
-                }
-            } catch ( error ) {
-                console.error( 'Error loading data:', error );
-            }
-        };
-
         loadData();
     }, [router] );
+
+    const loadData = async () => {
+        try {
+            const response = await fetch( '/api/quiz-data' );
+            if ( !response.ok ) throw new Error( 'Failed to fetch data' );
+            const { quizzes, user, progress } = await response.json();
+
+            setQuizOptions( quizzes );
+            setQuizProgress( progress );
+            setUser( user );
+            setIsLoading( false );
+
+            if ( !user ) {
+                router.push( '/login' );  // Redirect if no user data
+            }
+        } catch ( error ) {
+            console.error( 'Error loading data:', error );
+        }
+    };
 
 
     const handleQuizSelection = ( quizId: string ) => {
