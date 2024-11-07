@@ -18,7 +18,7 @@ sequelize
     .catch( ( err: Error ) => console.error( 'Database connection error:', err ) );
 
 // Attach routes
-app.use( '/api/users', userRoutes ); // Make sure to use 'app.use' here
+app.use( '/api/users', userRoutes );
 
 // Start the server
 app.listen( PORT, () => {

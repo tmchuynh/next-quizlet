@@ -1,28 +1,33 @@
-// app/leaderboard/page.tsx
-
 "use client";
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-
-// Utility function to fetch quiz names
-const getAllQuizNames = (): string[] => {
-  const quizNamesSet = new Set<string>();
-  for ( let i = 0; i < localStorage.length; i++ ) {
-    const key = localStorage.key( i );
-    if ( key && key.startsWith( "quizScores_" ) ) {
-      const scores = JSON.parse( localStorage.getItem( key ) || "[]" );
-      scores.forEach( ( score: { quiz: string; } ) => {
-        quizNamesSet.add( score.quiz );
-      } );
-    }
-  }
-  return Array.from( quizNamesSet ).sort();
-};
+import { useUser } from '@auth0/nextjs-auth0/client';
 
 const LeaderboardSelectionPage: React.FC = () => {
   const router = useRouter();
-  const quizNames = getAllQuizNames();
+  const { user } = useUser();
+  const [quizNames, setQuizNames] = useState<string[]>( [] );
+
+  useEffect( () => {
+    const fetchQuizNames = async () => {
+      if ( user && user.sub ) {
+        try {
+          const response = await fetch( `/api/scores?userId=${ user.sub }` );
+          if ( response.ok ) {
+            const data = await response.json();
+            setQuizNames( data );
+          } else {
+            console.error( 'Failed to fetch quiz names' );
+          }
+        } catch ( error ) {
+          console.error( 'Error fetching quiz names:', error );
+        }
+      }
+    };
+
+    fetchQuizNames();
+  }, [user] );
 
   const handleQuizSelection = ( quizName: string ) => {
     router.push( `/leaderboard/${ quizName }` );
