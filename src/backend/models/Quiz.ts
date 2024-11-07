@@ -1,11 +1,16 @@
-import { DataTypes, Model } from 'sequelize';
+import { Association, DataTypes, Model } from 'sequelize';
 import sequelize from '../config/database';
+import Score from './Score';
 
 class Quiz extends Model {
     public quiz_id!: number;
     public title!: string;
     public level!: number;
     public description?: string;
+
+    public static associations: {
+        quiz: Association<Score, Quiz>;
+    };
 }
 
 Quiz.init(
@@ -35,5 +40,7 @@ Quiz.init(
         timestamps: false,
     }
 );
+
+Quiz.hasMany( Score, { foreignKey: 'quiz_id', as: 'Score' } );
 
 export default Quiz;

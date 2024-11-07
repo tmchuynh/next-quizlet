@@ -1,27 +1,44 @@
-import { NextApiRequest, NextApiResponse } from 'next';
-import Score from '../../../backend/models/Score'; // Adjust the path as necessary
+// src/app/api/scores/route.ts
+import { NextResponse } from 'next/server';
+import Score from '../../../backend/models/Score';
+import Quiz from '../../../backend/models/Quiz';
 
-export default async function handler( req: NextApiRequest, res: NextApiResponse ) {
-    if ( req.method !== 'GET' ) {
-        return res.status( 405 ).json( { error: 'Method Not Allowed' } );
-    }
-
-    const { userId } = req.query;
+export async function GET( req: Request ) {
+    const { searchParams } = new URL( req.url );
+    const userId = searchParams.get( 'userId' );
 
     if ( !userId ) {
-        return res.status( 400 ).json( { error: 'User ID is required' } );
+        return NextResponse.json( { error: 'User ID is required' }, { status: 400 } );
     }
 
     try {
         const scores = await Score.findAll( {
             where: { user_id: userId },
-            attributes: ['quiz_id'],
+            include: [
+                {
+                    model: Quiz,
+                    as: "Score",
+                    attributes: ['title', 'description', 'level'],
+                },
+            ],
         } );
 
-        const quizNames = scores.map( ( score ) => score.quiz_id );
-        return quizNames;
+        if ( !scores.length ) {
+            return NextResponse.json( { message: 'No scores found' }, { status: 404 } );
+        }
+
+        const formattedScores = scores.map( ( score ) => ( {
+            quizTitle: score.Quiz?.title,
+            quizDescription: score.Quiz?.description,
+            level: score.Quiz?.level,
+            score: score.score,
+            totalQuestions: score.total_questions,
+            quizDate: score.quiz_date,
+        } ) );
+
+        return NextResponse.json( formattedScores, { status: 200 } );
     } catch ( error ) {
-        console.error( 'Error fetching quiz names:', error );
-        res.status( 500 ).json( { error: 'Internal server error' } );
+        console.error( 'Error fetching scores:', error );
+        return NextResponse.json( { error: 'Failed to fetch scores' }, { status: 500 } );
     }
 }

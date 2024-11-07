@@ -15,6 +15,7 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
                 {
                     model: Quiz,
                     where: { title: quizName },
+                    as: "Score",
                     attributes: ['quiz_id', 'title', 'level'],
                 },
             ],
