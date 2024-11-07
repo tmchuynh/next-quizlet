@@ -73,7 +73,6 @@ export interface Quiz {
     title: string;
     description: string;
     level: number;
-    created_at: Date;
 }
 
 export interface QuizOption {

@@ -5,16 +5,16 @@ import UserQuizProgress from '../../../backend/models/UserQuizProgress';
 export async function POST( request: Request ) {
     try {
         const body = await request.json();
-        const { userId, title, currentQuestionIndex, score, completed } = body;
+        const { userId, quizId, currentQuestionIndex, score, completed } = body;
 
         // Validate required fields
-        if ( !userId || !title ) {
-            return NextResponse.json( { error: 'User ID and title are required' }, { status: 400 } );
+        if ( !userId || !quizId ) {
+            return NextResponse.json( { error: 'User ID and quiz ID are required' }, { status: 400 } );
         }
 
         // Process logic to create or update user progress
         const progress = await UserQuizProgress.findOne( {
-            where: { user_id: userId, title },
+            where: { user_id: userId },
         } );
 
         if ( progress ) {
@@ -23,7 +23,7 @@ export async function POST( request: Request ) {
         } else {
             const newProgress = await UserQuizProgress.create( {
                 user_id: userId,
-                title,
+                quiz_id: quizId,
                 current_question_index: currentQuestionIndex,
                 score,
                 completed,

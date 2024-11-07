@@ -8,7 +8,7 @@ import { QuizOption, ProgressItem, Quiz } from '../types/index';
 
 const QuizSelectionPage: React.FC = () => {
     const router = useRouter();
-    const [quizOptions, setQuizOptions] = useState<Quiz[]>( [] );
+    const [quizzes, setQuizzes] = useState<Quiz[]>( [] );
     const [quizProgress] = useState<ProgressItem[]>( [] );
     const [quizNames, setQuizNames] = useState<string[]>( [] );
     const { user, isLoading } = useUser();
@@ -19,16 +19,20 @@ const QuizSelectionPage: React.FC = () => {
                 try {
                     const response = await fetch( "/api/quiz" );
                     if ( response.ok ) {
-                        const data: { title: string; }[] = await response.json();
+                        const data = await response.json();
                         console.log( 'Fetched quiz names:', data );
 
-                        // Extract unique quiz titles using reduce
-                        const uniqueTitles = data
-                            .map( quiz => quiz.title )
-                            .filter( ( title, index, self ) => self.indexOf( title ) === index );
+                        const uniqueData = data.filter( ( item: { title: any; }, index: any, self: any[] ) =>
+                            index === self.findIndex( ( t ) => t.title === item.title )
+                        );
 
-                        console.log( 'Filtered quiz titles:', uniqueTitles );
-                        setQuizNames( uniqueTitles );
+                        // Log or use the filtered data
+                        console.log( 'Filtered unique data:', uniqueData );
+
+                        setQuizzes( uniqueData );
+
+
+                        setQuizNames( uniqueData.map( ( quiz: { title: any; } ) => quiz.title ) );
                     } else {
                         console.error( 'Failed to fetch quiz names: HTTP status', response.status );
                     }
@@ -43,8 +47,10 @@ const QuizSelectionPage: React.FC = () => {
 
     const handleQuizSelection = async ( quizName: string ) => {
         const quizTitle = quizNames.find( ( quiz ) => quiz === quizName ) || '';
+        const quiz_id = quizzes.find( ( quiz ) => quiz.title === quizTitle )?.quiz_id || '';
 
         console.log( 'Selected quiz:', quizTitle );
+        console.log( 'Selected quiz:', quiz_id );
 
         if ( !user?.sub || !quizTitle ) {
             console.error( 'User ID or quiz title is missing' );
@@ -60,6 +66,7 @@ const QuizSelectionPage: React.FC = () => {
                 body: JSON.stringify( {
                     userId: user.sub, // Ensure this is defined and correct
                     title: quizTitle, // Pass the correct quiz title
+                    quizId: quiz_id,
                     currentQuestionIndex: 0,
                     score: 0,
                     completed: false,

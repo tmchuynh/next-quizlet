@@ -8,9 +8,7 @@ import { NextResponse } from 'next/server';
  */
 export async function GET() {
     try {
-        const quizzes = await Quiz.findAll( {
-            attributes: ['title']
-        } );
+        const quizzes = await Quiz.findAll();
 
         return NextResponse.json( quizzes );
     } catch ( error ) {
