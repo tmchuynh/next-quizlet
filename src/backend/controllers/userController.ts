@@ -1,6 +1,7 @@
 import bcrypt from 'bcrypt'; // Assuming bcrypt is used for password hashing
 import { Request, Response } from 'express';
 import User from '../models/User';
+import request from 'request';
 import axios from 'axios';
 
 export const getUserProfile = async ( req: Request, res: Response ) => {
@@ -21,8 +22,90 @@ export const getUserProfile = async ( req: Request, res: Response ) => {
     }
 };
 
+const querystring = require( 'querystring' );
+
+async function getAuth0Token() {
+    try {
+        // Debug: Log environment variables (ensure this is safe and won't expose secrets in production logs)
+        console.log( 'Debug - Environment Variables:' );
+        console.log( 'AUTH0_ISSUER_BASE_URL:', process.env.NEXT_PUBLIC_AUTH0_ISSUER_BASE_URL );
+        console.log( 'AUTH0_CLIENT_ID:', process.env.AUTH0_CLIENT_ID );
+        console.log( 'AUTH0_CLIENT_SECRET:', process.env.AUTH0_CLIENT_SECRET ? '*****' : 'Not Set' );
+
+        // Prepare the payload
+        const payload = {
+            client_id: process.env.AUTH0_CLIENT_ID,
+            client_secret: process.env.AUTH0_CLIENT_SECRET,
+            audience: `${ process.env.NEXT_PUBLIC_AUTH0_ISSUER_BASE_URL }/api/v2/`,
+            grant_type: 'client_credentials',
+        };
+
+        // Debug: Log payload
+        console.log( 'Debug - Request Payload:', payload );
+
+        // Make the request
+        const response = await axios.post(
+            `${ process.env.NEXT_PUBLIC_AUTH0_ISSUER_BASE_URL }/oauth/token`,
+            querystring.stringify( payload ), // Convert payload to URL-encoded format
+            {
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            }
+        );
+
+        console.log( "Auth0 token retrieved successfully." );
+        return response.data.access_token;
+    } catch ( error ) {
+        if ( axios.isAxiosError( error ) && error.response ) {
+            console.error( 'Failed to retrieve Auth0 token:', error.response.data );
+        } else {
+            console.error( 'Failed to retrieve Auth0 token:', error );
+        }
+        throw new Error( 'Unable to retrieve Auth0 token' );
+    }
+}
+
+
+const getManagementApiToken = async () => {
+    console.log( "Requesting Auth0 token..." );
+
+    let data = JSON.stringify( {
+        "client_id": `${ process.env.AUTH0_CLIENT_ID }`,
+        "audience": `${ process.env.NEXT_PUBLIC_AUTH0_ISSUER_BASE_URL }/api/v2/`,
+        "organization_usage": "deny",
+        "allow_any_organization": false,
+        "scope": [
+            "read:users",
+            "update:users",
+            "delete:users",
+            "read:user_metadata",
+            "update:user_metadata",
+            "delete:user_metadata",
+        ]
+    } );
+
+    let config = {
+        method: 'post',
+        maxBodyLength: Infinity,
+        url: 'https://login.auth0.com/api/v2/client-grants',
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        },
+        data: data
+    };
+
+    axios.request( config )
+        .then( ( response ) => {
+            console.log( JSON.stringify( response.data ) );
+        } )
+        .catch( ( error ) => {
+            console.log( error );
+        } );
+};
+
 export async function getUserById( auth0UserId: string ) {
-    const token = process.env.AUTH0_MGMT_API_ACCESS_TOKEN;
+    getManagementApiToken();
+    const token = await getAuth0Token();
 
     if ( !process.env.NEXT_PUBLIC_AUTH0_ISSUER_BASE_URL ) {
         throw new Error( "The AUTH0_ISSUER_BASE_URL environment variable is not set correctly." );
@@ -41,6 +124,39 @@ export async function getUserById( auth0UserId: string ) {
         return response.data;
     } catch ( error ) {
         console.error( "Error retrieving user from Auth0:", error );
+        throw error;
+    }
+}
+
+export async function getUserByName( name: string ) {
+    const token = await getAuth0Token(); // Assumes you have a function to get a valid Auth0 Management API token
+
+    if ( !process.env.NEXT_PUBLIC_AUTH0_ISSUER_BASE_URL ) {
+        throw new Error( "The AUTH0_ISSUER_BASE_URL environment variable is not set correctly." );
+    }
+
+    const options = {
+        method: 'GET',
+        url: `${ process.env.NEXT_PUBLIC_AUTH0_ISSUER_BASE_URL }/api/v2/users`,
+        headers: {
+            authorization: `Bearer ${ token }`,
+            'Content-Type': 'application/json'
+        },
+        params: {
+            q: `name:"${ name }"`,
+            search_engine: 'v3'
+        }
+    };
+
+    try {
+        const response = await axios.request( options );
+        if ( response.data.length === 0 ) {
+            console.warn( 'No user found with the specified name.' );
+            return null;
+        }
+        return response.data;
+    } catch ( error ) {
+        console.error( "Error retrieving user by name from Auth0:", error );
         throw error;
     }
 }

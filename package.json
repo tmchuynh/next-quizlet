@@ -48,6 +48,7 @@
     "@types/bcrypt": "^5.0.2",
     "@types/express": "^5.0.0",
     "@types/react": "^18.3.12",
+    "@types/request": "^2.48.12",
     "eslint": "^8",
     "eslint-config-next": "15.0.2",
     "postcss": "^8.4.47"

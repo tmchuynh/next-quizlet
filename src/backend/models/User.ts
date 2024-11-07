@@ -1,21 +1,26 @@
 import { DataTypes, Model, Optional } from 'sequelize';
 import sequelize from '../config/database';
-import { User } from '../../app/types/index';
-
-type UserCreationAttributes = Optional<User, 'user_id' | 'created_at'>;
-
-class User_ extends Model<User, UserCreationAttributes> implements User {
-    public user_id!: string;
-    public readonly created_at!: Date;
+interface UserAttributes {
+    user_id: string;
+    created_at: Date;
 }
 
-User_.init(
+// Define which attributes are optional when creating a User instance
+type UserCreationAttributes = Optional<UserAttributes, 'created_at'>;
+
+// Define the User model class, extending the Sequelize Model
+class User extends Model<UserAttributes, UserCreationAttributes> implements UserAttributes {
+    public user_id!: string;
+    public created_at!: Date;
+}
+
+
+User.init(
     {
         user_id: {
-            type: DataTypes.STRING,
-            autoIncrement: false,
-            allowNull: false,
+            type: DataTypes.STRING( 250 ),
             primaryKey: true,
+            allowNull: false,
         },
         created_at: {
             type: DataTypes.DATE,
@@ -30,4 +35,4 @@ User_.init(
     }
 );
 
-export default User_;
+export default User;

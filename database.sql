@@ -6,7 +6,7 @@ USE quizlet;
 
 -- Create users table
 CREATE TABLE IF NOT EXISTS users (
-    user_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id VARCHAR(250) NOT NULL PRIMARY KEY,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -45,7 +45,7 @@ CREATE TABLE IF NOT EXISTS answers (
 -- Create user_quiz_progress table
 CREATE TABLE IF NOT EXISTS user_quiz_progress (
     progress_id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT NOT NULL,
+    user_id VARCHAR(250) NOT NULL,
     quiz_id INT NOT NULL,
     current_question_index INT DEFAULT 0,
     score INT DEFAULT 0,
@@ -58,8 +58,8 @@ CREATE TABLE IF NOT EXISTS user_quiz_progress (
 -- Create user_activity table
 CREATE TABLE IF NOT EXISTS user_activity (
     activity_id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT NOT NULL,
-    DATE DATE NOT NULL,
+    user_id VARCHAR(250) NOT NULL,
+    quiz_date DATE NOT NULL, -- Renamed from DATE to quiz_date
     quizzes_completed INT DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users (user_id) ON DELETE CASCADE
@@ -68,11 +68,11 @@ CREATE TABLE IF NOT EXISTS user_activity (
 -- Create scores table
 CREATE TABLE IF NOT EXISTS scores (
     score_id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT NOT NULL,
+    user_id VARCHAR(250) NOT NULL,
     quiz_id INT NOT NULL,
     score INT NOT NULL,
     total_questions INT NOT NULL,
-    DATE TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    quiz_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Renamed from DATE to quiz_date
     FOREIGN KEY (user_id) REFERENCES users (user_id) ON DELETE CASCADE,
     FOREIGN KEY (quiz_id) REFERENCES quizzes (quiz_id) ON DELETE CASCADE
 );
