@@ -31,7 +31,11 @@ const ColorPickerComponent: React.FC<ColorPickerProps> = ( { onColorChange, init
         return () => colorPicker.off( 'color:change', handleColorChange );
     }, [onColorChange, initialColor] );
 
-    return <div ref={pickerRef} className="color-picker mt-5"></div>;
+    return (
+        <>
+            <div ref={pickerRef} className="color-picker mt-5"></div>
+        </>
+    );
 };
 
 function updateContributionGridColorTheme( baseColor: string ) {

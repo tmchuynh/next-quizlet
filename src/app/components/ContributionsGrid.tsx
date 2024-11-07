@@ -12,7 +12,9 @@ const ContributionsGrid: React.FC<ContributionsGridProps> = ( { baseColor } ) =>
     }, [baseColor] );
 
     return (
-        <div id="contributionGrid" className="grid grid-cols-4 m-auto p-5 col-span justify-items-center"></div>
+        <>
+            <div id="contributionGrid" className="grid grid-cols-4 m-auto p-5 col-span justify-items-center"></div>
+        </>
     );
 };
 

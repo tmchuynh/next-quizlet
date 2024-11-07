@@ -18,14 +18,15 @@ const DashboardPage: React.FC = () => {
     useEffect( () => {
         if ( !isLoading ) {
             if ( !user || user.sub !== params.id ) {
-                router.push( '/auth' );
+                router.push( '/api/auth/login' );
             } else {
-                loadUserProfile( user.sub! );
+                console.log( user.sub );
+                loadUserProfile( user.sub );
             }
         }
     }, [isLoading, user, params.id] );
 
-    const loadUserProfile = async ( userId: string ) => {
+    const loadUserProfile = async ( userId: string | undefined ) => {
         try {
             const response = await fetch( `/api/users/${ userId }` );
             if ( !response.ok ) {
@@ -42,17 +43,19 @@ const DashboardPage: React.FC = () => {
     if ( isLoading ) return <p>Loading...</p>;
 
     return (
-        <div className="dashboard-container flex flex-col items-center min-h-screen px-6 py-4 lg:px-8 bg-gray-800 text-white rounded-lg w-full lg:w-2/3">
-            <h2 className="text-4xl font-extrabold mb-5">User Profile</h2>
-            {userProfile && (
-                <div className="profile-info space-y-4">
-                    <p>ID: {userProfile.user_id}</p>
-                    <p>Created At: {new Date( userProfile.created_at ).toLocaleDateString()}</p>
-                </div>
-            )}
-            <ColorPickerComponent onColorChange={setBaseColor} />
-            <ContributionsGrid baseColor={baseColor} />
-        </div>
+        <>
+            <div className="dashboard-container flex flex-col items-center min-h-screen px-6 py-4 lg:px-8 bg-gray-800 text-white rounded-lg w-full lg:w-2/3">
+                <h2 className="text-4xl font-extrabold mb-5">User Profile</h2>
+                {userProfile && (
+                    <div className="profile-info space-y-4">
+                        <p>ID: {userProfile.user_id}</p>
+                        <p>Created At: {new Date( userProfile.created_at ).toLocaleDateString()}</p>
+                    </div>
+                )}
+                <ColorPickerComponent onColorChange={setBaseColor} />
+                <ContributionsGrid baseColor={baseColor} />
+            </div>
+        </>
     );
 };
 
