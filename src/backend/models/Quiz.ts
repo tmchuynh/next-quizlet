@@ -1,15 +1,15 @@
-import { Association, DataTypes, Model } from 'sequelize';
+import { DataTypes, Model, Association } from 'sequelize';
 import sequelize from '../config/database';
 import Score from './Score';
 
 class Quiz extends Model {
     public quiz_id!: number;
     public title!: string;
+    public description!: string;
     public level!: number;
-    public description?: string;
 
     public static associations: {
-        quiz: Association<Score, Quiz>;
+        scores: Association<Quiz, Score>;
     };
 }
 
@@ -21,16 +21,15 @@ Quiz.init(
             primaryKey: true,
         },
         title: {
-            type: DataTypes.STRING,
-            allowNull: false,
-        },
-        level: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.STRING( 100 ),
             allowNull: false,
         },
         description: {
             type: DataTypes.TEXT,
-            allowNull: true,
+        },
+        level: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
         },
     },
     {
@@ -40,7 +39,5 @@ Quiz.init(
         timestamps: false,
     }
 );
-
-Quiz.hasMany( Score, { foreignKey: 'quiz_id', as: 'Score' } );
 
 export default Quiz;

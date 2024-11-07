@@ -9,7 +9,6 @@ class Score extends Model {
     public score!: number;
     public total_questions!: number;
     public quiz_date!: Date;
-    public Quiz?: Quiz;
 
     public static associations: {
         quiz: Association<Score, Quiz>;
@@ -24,7 +23,7 @@ Score.init(
             primaryKey: true,
         },
         user_id: {
-            type: DataTypes.STRING,
+            type: DataTypes.STRING( 250 ),
             allowNull: false,
         },
         quiz_id: {
@@ -51,11 +50,5 @@ Score.init(
         timestamps: false,
     }
 );
-
-// Define the association
-Score.belongsTo( Quiz, {
-    foreignKey: 'quiz_id',
-    as: 'Quiz',
-} );
 
 export default Score;

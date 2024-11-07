@@ -29,10 +29,4 @@ UserQuizProgress.belongsTo( Quiz, { foreignKey: 'quiz_id' } );
 Quiz.hasMany( Score, { foreignKey: 'quiz_id' } );
 Score.belongsTo( Quiz, { foreignKey: 'quiz_id' } );
 
-Score.belongsTo( Quiz, { foreignKey: 'quiz_id', as: 'Quiz' } );
-Quiz.hasMany( Score, {
-    foreignKey: 'quiz_id',
-    as: 'Score',
-} );
-
 export default { User, Quiz, Question, Answer, UserQuizProgress, UserActivity, Score };

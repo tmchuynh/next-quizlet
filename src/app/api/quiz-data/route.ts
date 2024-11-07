@@ -12,6 +12,10 @@ export async function GET() {
             attributes: ['quiz_id', 'title', 'description'],
         } );
 
+        if ( !quizzes.length ) {
+            return NextResponse.json( { message: 'No quizzes found' }, { status: 404 } );
+        }
+
         return NextResponse.json( quizzes );
     } catch ( error ) {
         console.error( 'Error fetching quiz data:', error );

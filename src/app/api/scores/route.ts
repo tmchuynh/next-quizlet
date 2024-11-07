@@ -12,25 +12,13 @@ export async function GET( req: Request ) {
     }
 
     try {
-        const scores = await Score.findAll( {
-            where: { user_id: userId },
-            include: [
-                {
-                    model: Quiz,
-                    as: "Score",
-                    attributes: ['title', 'description', 'level'],
-                },
-            ],
-        } );
+        const quizzes = await Score.findAll();
 
-        if ( !scores.length ) {
-            return NextResponse.json( { message: 'No scores found' }, { status: 404 } );
+        if ( !quizzes.length ) {
+            return NextResponse.json( { message: 'No quizzes found' }, { status: 404 } );
         }
 
-        const formattedScores = scores.map( ( score ) => ( {
-            quizTitle: score.Quiz?.title,
-            quizDescription: score.Quiz?.description,
-            level: score.Quiz?.level,
+        const formattedScores = quizzes.map( ( score ) => ( {
             score: score.score,
             totalQuestions: score.total_questions,
             quizDate: score.quiz_date,
@@ -38,7 +26,7 @@ export async function GET( req: Request ) {
 
         return NextResponse.json( formattedScores, { status: 200 } );
     } catch ( error ) {
-        console.error( 'Error fetching scores:', error );
-        return NextResponse.json( { error: 'Failed to fetch scores' }, { status: 500 } );
+        console.error( 'Error fetching quizzes:', error );
+        return NextResponse.json( { error: 'Failed to fetch quizzes' }, { status: 500 } );
     }
 }
