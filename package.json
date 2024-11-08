@@ -46,6 +46,7 @@
   "devDependencies": {
     "@types/auth0-js": "^9.21.6",
     "@types/bcrypt": "^5.0.2",
+    "@types/cors": "^2.8.17",
     "@types/express": "^5.0.0",
     "@types/react": "^18.3.12",
     "@types/request": "^2.48.12",
