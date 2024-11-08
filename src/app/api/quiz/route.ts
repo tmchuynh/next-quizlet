@@ -1,5 +1,5 @@
-import Quiz from '../../../backend/models/Quiz';
 import { NextResponse } from 'next/server';
+import { Quiz } from '../../../backend/models/index';
 
 /**
  * Fetches all quiz titles and descriptions.

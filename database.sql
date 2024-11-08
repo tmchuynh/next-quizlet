@@ -70,6 +70,7 @@ CREATE TABLE IF NOT EXISTS scores (
     score_id INT AUTO_INCREMENT PRIMARY KEY,
     user_id VARCHAR(250) NOT NULL,
     quiz_id INT NOT NULL,
+    level INT NOT NULL,
     score INT NOT NULL,
     total_questions INT NOT NULL,
     quiz_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

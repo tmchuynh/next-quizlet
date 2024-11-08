@@ -1,8 +1,7 @@
 import { NextResponse } from 'next/server';
 import UserQuizProgress from '../../../backend/models/UserQuizProgress';
-import User from '../../../backend/models/User';  // Assuming there is a User model for the `users` table
 import { addUserToDatabase } from '../../../backend/controllers/userController';
-import Quiz from '../../../backend/models/Quiz';
+import { Quiz, User } from '../../../backend/models/index';
 
 export async function POST( request: Request ) {
     try {

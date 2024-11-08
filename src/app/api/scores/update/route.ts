@@ -1,7 +1,7 @@
 // app/api/scores/update/route.ts
 
 import { NextResponse } from 'next/server';
-import Score from '../../../../backend/models/Score';
+import { Score } from '../../../../backend/models/index';
 
 export async function PUT( request: Request ) {
     try {

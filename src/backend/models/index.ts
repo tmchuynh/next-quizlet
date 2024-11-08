@@ -21,29 +21,28 @@ Score.belongsTo( User, { foreignKey: 'user_id' } );
 Quiz.hasMany( Question, { foreignKey: 'quiz_id' } );
 Question.belongsTo( Quiz, { foreignKey: 'quiz_id' } );
 
-Question.hasMany( Answer, { foreignKey: 'question_id' } );
-Answer.belongsTo( Question, { foreignKey: 'question_id' } );
-
 Quiz.hasMany( UserQuizProgress, { foreignKey: 'quiz_id' } );
 UserQuizProgress.belongsTo( Quiz, { foreignKey: 'quiz_id' } );
 
 Quiz.hasMany( Score, { foreignKey: 'quiz_id' } );
 Score.belongsTo( Quiz, { foreignKey: 'quiz_id' } );
 
-Question.belongsTo( Quiz, { foreignKey: 'quiz_id', as: 'quiz' } );
-Quiz.hasMany( Question, { foreignKey: 'quiz_id', as: 'questions' } );
-
-Answer.belongsTo( Question, { foreignKey: 'question_id', as: 'question' } );
 Question.hasMany( Answer, { foreignKey: 'question_id', as: 'answers' } );
-
-Score.belongsTo( User, { foreignKey: 'user_id', as: 'user' } );
-User.hasMany( Score, { foreignKey: 'user_id', as: 'scores' } );
-
-Score.belongsTo( Quiz, { foreignKey: 'quiz_id', as: 'quiz' } );
-Quiz.hasMany( Score, { foreignKey: 'quiz_id', as: 'scores' } );
+Answer.belongsTo( Question, { foreignKey: 'question_id', as: 'question' } );
 
 sequelize.sync().then( () => {
     console.log( 'Database & tables created!' );
 } );
 
-export default { sequelize, User, Quiz, Question, Answer, UserQuizProgress, UserActivity, Score };
+
+export {
+    sequelize,
+    User,
+    Quiz,
+    Question,
+    Answer,
+    UserQuizProgress,
+    UserActivity,
+    Score,
+};
+

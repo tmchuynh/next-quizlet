@@ -1,6 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import Score from '../../../../backend/models/Score';
-import Quiz from '../../../../backend/models/Quiz';
+import { Quiz, Score } from '../../../../backend/models/index';
 
 export default async function handler( req: NextApiRequest, res: NextApiResponse ) {
     const { quizName } = req.query;
@@ -24,7 +23,7 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
         const leaderboardData = scores.map( ( score ) => ( {
             user_id: score.user_id,
             quiz_id: score.quiz_id,
-            score: ( score.score / score.total_questions ) * 100,
+            score: ( score.score! / score.total_questions! ) * 100,
             date: score.quiz_date,
         } ) );
 

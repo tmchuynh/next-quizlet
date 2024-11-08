@@ -27,11 +27,13 @@ export interface LeaderboardEntry {
 }
 
 export interface Answer {
+    answer_id: number;
     text: string;
     correct: boolean;
 }
 
 export interface Question {
+    question_type: string;
     question: string;
     answers: Answer[];
 }

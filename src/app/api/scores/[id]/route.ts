@@ -1,7 +1,7 @@
 // app/api/scores/[id]/route.ts
 
 import { NextResponse } from 'next/server';
-import Score from '../../../../backend/models/Score';
+import { Score } from '../../../../backend/models/index';
 
 export async function GET(
     { params }: { params: { scoreId: string; }; }

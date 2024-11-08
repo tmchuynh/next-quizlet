@@ -4,6 +4,11 @@ import sequelize from '../config/database';
 class Score extends Model {
     score_id: number | undefined;
     score: number | undefined;
+    user_id: string | undefined;
+    quiz_id: string | undefined;
+    total_questions: number | undefined;
+    quiz_date: Date | undefined;
+    level: number | undefined;
 }
 
 Score.init(
@@ -18,6 +23,10 @@ Score.init(
             allowNull: false,
         },
         quiz_id: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+        },
+        level: {
             type: DataTypes.INTEGER,
             allowNull: false,
         },

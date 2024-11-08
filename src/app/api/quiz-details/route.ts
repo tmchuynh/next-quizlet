@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import Quiz from '../../../backend/models/Quiz';
+import { Quiz } from '../../../backend/models/index';
 
 export async function GET( request: Request ) {
     const { searchParams } = new URL( request.url );
