@@ -11,16 +11,16 @@ const Header = () => {
     return (
         <header className="p-4 bg-gray-900 text-white flex justify-between items-center">
             <h1 className="text-2xl col-span-9">My App</h1>
-            <nav className="grid grid-cols-4 grid-rows-4 gap-4">
+            <nav>
                 {user ? (
                     <>
-                        <Link href={`/${ user.sub }/dashboard`}>Profile</Link>
-                        <Link href="/leaderboard">Leaderbord</Link>
-                        <Link href="/quiz">Quiz</Link>
-                        <Link href="/api/auth/logout">Logout</Link>
+                        <Link className='p-7' href={`/${ user.sub }/dashboard`}>Profile</Link>
+                        <Link className='p-7' href="/leaderboard">Leaderbord</Link>
+                        <Link className='p-7' href="/quiz">Quiz</Link>
+                        <Link className='p-7' href="/api/auth/logout">Logout</Link>
                     </>
                 ) : (
-                    <Link href="/api/auth/login">Login</Link>
+                    <Link className='p-7' href="/api/auth/login">Login</Link>
                 )}
             </nav>
         </header>
