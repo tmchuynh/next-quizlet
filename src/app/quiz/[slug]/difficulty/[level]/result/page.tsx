@@ -29,7 +29,8 @@ const ResultPage = () => {
 
             try {
                 const res = await fetch( `/api/scores/${ scoreId }` );
-                const data = await res.json();
+                const _data = await res.json();
+                const data = _data[0];
 
                 if ( res.ok ) {
                     setScore( data.score );
@@ -44,6 +45,8 @@ const ResultPage = () => {
 
         fetchScore();
     }, [] );
+
+
 
     return (
         <div className="flex flex-col min-h-full justify-center items-center px-6 py-4 lg:px-8 container border-4 border-gray-200 dark:border-gray-100 dark:bg-gray-800 dark:text-white rounded-2xl mx-auto my-4 w-full lg:w-11/12">

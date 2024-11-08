@@ -24,11 +24,6 @@ export default function RootLayout( {
         issuer: process.env.NEXT_PUBLIC_CUSTOM_DOMAIN_NAME || ""
     };
 
-    console.log( `Client ID: ${ clientID }` );
-    console.log( `Domain: ${ domain }` );
-    console.log( `Auth0 Tenant: ${ auth0Tenant }` );
-    console.log( `Authorization Server Issuer: ${ authorizationServer.issuer }` );
-
     useEffect( () => {
         const loadAuth0Script = () => {
             return new Promise<void>( ( resolve, reject ) => {

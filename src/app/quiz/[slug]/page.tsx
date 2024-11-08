@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation'; // use `next/navigation` for App Router
 import { ProgressItem, Score } from '../../types';
 
@@ -10,7 +10,8 @@ interface QuizDifficultyPageProps {
     };
 }
 
-const QuizDifficultyPage: React.FC<QuizDifficultyPageProps> = ( { params } ) => {
+const QuizDifficultyPage: React.FC<QuizDifficultyPageProps> = props => {
+    const params = use(props.params);
     const { slug: quizId } = params;
     const router = useRouter();
     const [progress, setProgress] = useState<ProgressItem[]>( [] );

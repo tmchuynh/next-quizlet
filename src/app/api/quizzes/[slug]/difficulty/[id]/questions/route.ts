@@ -4,8 +4,9 @@ import { Answer, Question, Quiz } from '../../../../../../../backend/models/';
 
 export async function GET(
     request: Request,
-    { params }: { params: { title: string, level: number, id: number; }; }
+    props: { params: Promise<{ title: string, level: number, id: number; }>; }
 ) {
+    const params = await props.params;
     try {
         const { title, level, id } = params;
 

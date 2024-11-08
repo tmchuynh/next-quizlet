@@ -1,4 +1,5 @@
 module.exports = {
+  reactStrictMode: false,
   webpack: ( config: { resolve: { fallback: any; }; }, { isServer }: any ) => {
     if ( !isServer ) {
       config.resolve.fallback = {

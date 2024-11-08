@@ -3,15 +3,13 @@
 import { NextResponse } from 'next/server';
 import { Score } from '../../../../backend/models';
 
-export async function GET(
-    request: Request,
-    { params }: { params: { scoreId: string; }; }
-) {
+export async function GET( request: Request, props: { params: Promise<{ id: string; }>; } ) {
+    const params = await props.params;
     try {
-        const { scoreId } = params;
+        console.log( 'Fetching score with ID:', params );
 
         const score = await Score.findAll( {
-            where: { score_id: scoreId },
+            where: { score_id: params.id },
         } );
 
         if ( !score ) {
