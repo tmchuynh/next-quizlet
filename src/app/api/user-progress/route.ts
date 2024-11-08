@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import UserQuizProgress from '../../../backend/models/UserQuizProgress';
 import User from '../../../backend/models/User';  // Assuming there is a User model for the `users` table
+import { addUserToDatabase } from '../../../backend/controllers/userController';
 
 // Export the POST method
 export async function POST( request: Request ) {
@@ -21,7 +22,8 @@ export async function POST( request: Request ) {
         } );
 
         if ( !userExists ) {
-            return NextResponse.json( { error: 'User not found' }, { status: 404 } );
+            addUserToDatabase( userId );
+            NextResponse.json( { error: 'User not found' }, { status: 404 } );
         }
 
         // Process logic to create or update user progress
