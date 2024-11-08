@@ -19,9 +19,9 @@ export default function RootLayout( {
 
     const clientID = process.env.NEXT_PUBLIC_AUTH0_CLIENT_ID || "";
     const domain = process.env.NEXT_PUBLIC_AUTH0_DOMAIN || "";
-    const auth0Tenant = process.env.PUBLC_AUTH0_TENANT || "";
+    const auth0Tenant = process.env.AUTH0_TENANT || "";
     const authorizationServer = {
-        issuer: process.env.NEXT_PUBLIC_CUSTOM_DOMAIN || ""
+        issuer: process.env.NEXT_PUBLIC_CUSTOM_DOMAIN_NAME || ""
     };
 
     console.log( `Client ID: ${ clientID }` );
