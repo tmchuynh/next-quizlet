@@ -47,6 +47,7 @@ CREATE TABLE IF NOT EXISTS user_quiz_progress (
     progress_id INT AUTO_INCREMENT PRIMARY KEY,
     user_id VARCHAR(250) NOT NULL,
     quiz_id INT NOT NULL,
+    level INT NOT NULL,
     current_question_index INT DEFAULT 0,
     score INT DEFAULT 0,
     completed BOOLEAN DEFAULT FALSE,
