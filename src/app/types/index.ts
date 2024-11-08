@@ -72,7 +72,7 @@ export interface Quiz {
     quiz_id: string;
     title: string;
     description: string;
-    level: number;
+    level: number[];
 }
 
 export interface QuizOption {

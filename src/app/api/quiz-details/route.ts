@@ -13,7 +13,7 @@ export async function GET( request: Request ) {
 
     try {
         // Fetch the quiz by title
-        const quiz = await Quiz.findOne( {
+        const quiz = await Quiz.findAll( {
             where: { title },
         } );
 

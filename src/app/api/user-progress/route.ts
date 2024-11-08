@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import UserQuizProgress from '../../../backend/models/UserQuizProgress';
 import User from '../../../backend/models/User';  // Assuming there is a User model for the `users` table
 import { addUserToDatabase } from '../../../backend/controllers/userController';
+import Quiz from '../../../backend/models/Quiz';
 
 export async function POST( request: Request ) {
     try {
@@ -58,6 +59,46 @@ export async function POST( request: Request ) {
             return NextResponse.json( { error: 'Invalid user ID or quiz ID reference' }, { status: 400 } );
         }
 
+        return NextResponse.json( { error: 'Internal Server Error' }, { status: 500 } );
+    }
+}
+
+
+export async function GET( request: Request ) {
+    const { searchParams } = new URL( request.url );
+    const userId = searchParams.get( 'userId' );
+    const title = searchParams.get( 'quizTitle' );
+
+    console.log( "User ID:", userId );
+    console.log( "Quiz Title:", title );
+
+    if ( !userId || !title ) {
+        return NextResponse.json( { error: 'User ID and quiz title are required' }, { status: 400 } );
+    }
+
+    try {
+        const quiz = await Quiz.findOne( {
+            where: { title },
+        } );
+
+        const quizId = quiz?.quiz_id;
+
+        console.log( 'Quiz ID:', quizId );
+
+        const progress = await UserQuizProgress.findAll( {
+            where: {
+                user_id: userId,
+                quiz_id: quizId, // Ensure this matches your database schema
+            },
+        } );
+
+        if ( !progress ) {
+            return NextResponse.json( { error: 'Progress not found' }, { status: 404 } );
+        }
+
+        return NextResponse.json( progress );
+    } catch ( error ) {
+        console.error( 'Error fetching user progress:', error );
         return NextResponse.json( { error: 'Internal Server Error' }, { status: 500 } );
     }
 }
