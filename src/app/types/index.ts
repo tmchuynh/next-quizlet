@@ -6,21 +6,22 @@ export interface User {
 export interface ProgressItem {
     current_question_index: number;
     score: number;
-    quizId: string;
+    quiz_id: string;
     level: number;
-    difficultyLevel: number;
 }
 
 export interface Score {
-    date: Date;
+    quiz_date: Date;
+    user_id: string;
+    quiz_id: string;
     quiz: string;
-    difficultyLevel: number;
+    level: number;
     score: number;
-    total: number;
+    total_questions: number;
 }
 
 export interface LeaderboardEntry {
-    username: string;
+    user_id: string;
     score: number;
     date: Date;
     level: number;
@@ -28,14 +29,17 @@ export interface LeaderboardEntry {
 
 export interface Answer {
     answer_id: number;
+    question_id: number;
     answer_text: string;
     is_correct: boolean;
 }
 
 export interface Question {
+    question_id: number;
+    quiz_id: string;
     question_type: string;
-    question: string;
-    answers: Answer[];
+    level: number;
+    question_text: string;
 }
 
 // Define an export interface for the quiz data structure
@@ -75,10 +79,21 @@ export interface Quiz {
     title: string;
     description: string;
     level: number[];
+    created_at: Date;
 }
 
 export interface QuizOption {
     id: string;
     label: string;
     category: string;
+}
+
+export interface Score {
+    score_id: number;
+    user_id: string;
+    quiz_id: string;
+    level: number;
+    score: number;
+    total_questions: number;
+    quiz_date: Date;
 }
