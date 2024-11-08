@@ -18,8 +18,10 @@ const QuizPage = () => {
     const question_id = parseInt( segments[4] );
 
     const [questions, setQuestions] = useState<Question[]>( [] );
+    const [answers, setAnswers] = useState<Answer[]>( [] );
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState( 0 );
     const [shuffledQuestions, setShuffledQuestions] = useState<Question[]>( [] );
+    const [shuffledAnswers, setShuffledAnswers] = useState<Answer[]>( [] );
     const [scoreId, setScoreId] = useState<number | null>( null );
     const [selectedAnswer, setSelectedAnswer] = useState<string | null>( null );
     const [userInput, setUserInput] = useState<string>( '' );
@@ -41,7 +43,7 @@ const QuizPage = () => {
                     }
 
                     // Fetch questions for the quiz
-                    const questionsRes = await fetch( `/api/questions/${ question_id }/answers` );
+                    const questionsRes = await fetch( `/api/quizzes/${ currentTitle }/difficulty/${ level }/questions` );
                     const questionsData = await questionsRes.json();
 
                     console.log( 'Questions:', questionsData );
@@ -52,13 +54,30 @@ const QuizPage = () => {
                     }
 
                     // Shuffle questions
-                    const shuffled = questionsData.questions.sort( () => Math.random() - 0.5 );
-                    setShuffledQuestions( shuffled );
-                    setQuestions( shuffled );
+                    const questionsShuffled = questionsData.questions.sort( () => Math.random() - 0.5 );
+                    setShuffledQuestions( questionsShuffled );
+                    setQuestions( questionsShuffled );
+
+
+                    // Fetch questions for the quiz
+                    const answersRes = await fetch( `/api/quizzes/${ currentTitle }/difficulty/${ level }/answers` );
+                    const answersData = await answersRes.json();
+
+                    console.log( 'Answers:', answersData );
+
+                    if ( questionsData.error ) {
+                        console.error( 'Error fetching questions:', answersData.error );
+                        return;
+                    }
+
+                    // Shuffle questions
+                    const answersShuffled = answersData.questions.sort( () => Math.random() - 0.5 );
+                    setShuffledAnswers( answersShuffled );
+                    setAnswers( answersShuffled );
 
                     // Initialize score
-                    if ( shuffled.length > 0 && !scoreId ) {
-                        await initializeScore( quizId, shuffled.length );
+                    if ( questionsShuffled.length > 0 && !scoreId ) {
+                        await initializeScore( quizData.quiz_id, questionsShuffled.length );
                     }
                 } catch ( error ) {
                     console.error( 'Error fetching data:', error );

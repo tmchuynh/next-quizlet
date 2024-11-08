@@ -3,17 +3,16 @@ import { NextResponse } from 'next/server';
 import { Answer, Question, Quiz } from '../../../../../../../backend/models/';
 
 export async function GET(
-    request: Request, response: Response
+    request: Request,
+    { params }: { params: { title: string, level: number, id: number; }; }
 ) {
-
-    console.log( response );
     try {
-        console.log( 'Fetching quiz ID from request URL:', request.url );
-
-        console.log( `Fetching questions for quiz "${ title }" (quizId: ${ quizId })` );
+        const { title, level, id } = params;
 
         const questions = await Question.findAll( {
-            where: { quiz_id: quizId },
+            where: {
+                quiz_id: id,
+            },
             include: [{ model: Answer, as: 'answers' }],
         } );
 
