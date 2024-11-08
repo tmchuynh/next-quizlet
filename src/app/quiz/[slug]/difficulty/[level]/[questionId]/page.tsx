@@ -13,7 +13,7 @@ const QuizPage = () => {
     const { user } = useUser();
 
     const segments = pathname.split( '/' ).filter( Boolean );
-    const currentTitle = segments.length > 1 ? decodeURIComponent( segments[1] ) : null;
+    const currentTitle = segments.length > 1 ? decodeURIComponent( segments[1] ) : '';
     const level = parseInt( segments[3] );
     const question_id = parseInt( segments[4] );
 
@@ -118,39 +118,47 @@ const QuizPage = () => {
     console.log( "CURRENT QUESTION", currentQuestion );
 
     const handleSubmitAnswer = async ( isCorrect: boolean ) => {
-        if ( isCorrect ) {
-            setResult( 'Correct!' );
-
-            // Update the score if the answer is correct
-            if ( scoreId ) {
-                await fetch( '/api/scores/update', {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify( { score_id: scoreId, increment: 1 } ),
-                } );
-            }
-        } else {
-            setResult( 'Wrong answer.' );
+        if ( isCorrect && scoreId ) {
+            await fetch( '/api/scores/update', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify( { score_id: scoreId, increment: 1 } ),
+            } );
         }
-    };
 
+        // Automatically go to the next question
+        goToNextQuestion();
+    };
 
 
     const handleWrittenAnswerSubmit = async () => {
         const currentQuestion = shuffledQuestions[currentQuestionIndex];
-        const userAnswer = userInput.trim().toLowerCase();
+        const userAnswer = userInput.trim();
 
-        // Find the correct answer(s)
+        if ( userAnswer === '' ) {
+            // Automatically go to the next question if the input is empty
+            goToNextQuestion();
+            return;
+        }
+
+        // Get the correct answers
         const correctAnswers = currentQuestion.answers
             .filter( ( answer: Answer ) => answer.is_correct )
-            .map( ( answer: Answer ) => answer.answer_text.trim().toLowerCase() );
+            .map( ( answer: Answer ) => answer.answer_text );
 
-        // Check if the user's answer matches any of the correct answers
-        const isCorrect = correctAnswers.includes( userAnswer );
+        let isCorrect = false;
+
+        for ( const correctAnswer of correctAnswers ) {
+            const distance = levenshtein( userAnswer, correctAnswer );
+            const threshold = Math.floor( correctAnswer.length * 0.2 ); // 20% threshold
+
+            if ( distance <= threshold ) {
+                isCorrect = true;
+                break;
+            }
+        }
 
         if ( isCorrect ) {
-            setResult( 'Correct!' );
-
             // Update the score if the answer is correct
             if ( scoreId ) {
                 await fetch( '/api/scores/update', {
@@ -159,23 +167,25 @@ const QuizPage = () => {
                     body: JSON.stringify( { score_id: scoreId, increment: 1 } ),
                 } );
             }
-        } else {
-            setResult( 'Wrong answer.' );
         }
+
+        // Automatically go to the next question
+        goToNextQuestion();
     };
 
 
 
     const goToNextQuestion = () => {
-        setResult( null );
+        setUserInput( '' );
 
         if ( currentQuestionIndex < shuffledQuestions.length - 1 ) {
             setCurrentQuestionIndex( currentQuestionIndex + 1 );
         } else {
             // Quiz is finished
-            router.push( `/quiz/${ currentTitle }/difficulty/result?scoreId=${ scoreId }` );
+            router.push( `/quiz/${ encodeURIComponent( currentTitle ) }/difficulty/${ level }/result?scoreId=${ scoreId }` );
         }
     };
+
 
 
     return (
@@ -192,11 +202,7 @@ const QuizPage = () => {
                                 {answers.answer_text}
                             </button>
                         ) )}
-
                     </div>
-                    <button className="button text-white mx-3 flex-end bg-green-700 hover:bg-green-800 focus:ring-4 focus:outline-none font-medium rounded-lg text-md px-5 py-2.5 text-center" onClick={goToNextQuestion}>
-                        Next Question
-                    </button>
                 </div>
             ) : (
                 <div className='w-full flex flex-col'>
@@ -214,7 +220,7 @@ const QuizPage = () => {
                             }}
                         />
                     </div>
-                    <button className="button text-white mx-3 flex-end bg-green-700 hover:bg-green-800 focus:ring-4 focus:outline-none font-medium rounded-lg text-md px-5 py-2.5 text-center" onClick={goToNextQuestion} >
+                    <button className="button text-white mx-3 flex-end bg-green-700 hover:bg-green-800 focus:ring-4 focus:outline-none font-medium rounded-lg text-md px-5 py-2.5 text-center" onClick={handleWrittenAnswerSubmit} >
                         Next Question
                     </button>
                 </div>
@@ -223,5 +229,41 @@ const QuizPage = () => {
         </div>
     );
 };
+
+function levenshtein( a: string, b: string ): number {
+    const an = a.length;
+    const bn = b.length;
+    const matrix = [];
+
+    // If one of the strings is empty
+    if ( an === 0 ) return bn;
+    if ( bn === 0 ) return an;
+
+    // Initialize the matrix
+    for ( let i = 0; i <= bn; i++ ) {
+        matrix[i] = [i];
+    }
+    for ( let j = 0; j <= an; j++ ) {
+        matrix[0][j] = j;
+    }
+
+    // Populate the matrix
+    for ( let i = 1; i <= bn; i++ ) {
+        for ( let j = 1; j <= an; j++ ) {
+            if ( b.charAt( i - 1 ) === a.charAt( j - 1 ) ) {
+                matrix[i][j] = matrix[i - 1][j - 1];
+            } else {
+                matrix[i][j] = Math.min(
+                    matrix[i - 1][j - 1] + 1, // substitution
+                    matrix[i][j - 1] + 1,     // insertion
+                    matrix[i - 1][j] + 1      // deletion
+                );
+            }
+        }
+    }
+
+    return matrix[bn][an];
+}
+
 
 export default QuizPage;
