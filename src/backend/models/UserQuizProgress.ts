@@ -36,6 +36,10 @@ UserQuizProgress.init( {
         type: DataTypes.INTEGER,
         defaultValue: 0,
     },
+    level: {
+        type: DataTypes.INTEGER,
+        defaultValue: 1,
+    },
     score: {
         type: DataTypes.INTEGER,
         defaultValue: 0,

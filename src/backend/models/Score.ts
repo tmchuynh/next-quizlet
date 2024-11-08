@@ -21,17 +21,33 @@ Score.init(
         user_id: {
             type: DataTypes.STRING( 250 ),
             allowNull: false,
+            references: {
+                model: 'users',
+                key: 'user_id',
+            },
+            onDelete: 'CASCADE',
         },
         quiz_id: {
             type: DataTypes.INTEGER,
             allowNull: false,
+            references: {
+                model: 'quizzes',
+                key: 'quiz_id',
+            },
+            onDelete: 'CASCADE',
         },
         level: {
             type: DataTypes.INTEGER,
             allowNull: false,
+            references: {
+                model: 'quizzes',
+                key: 'level',
+            },
+            onDelete: 'CASCADE',
         },
         score: {
             type: DataTypes.INTEGER,
+            defaultValue: 0,
             allowNull: false,
         },
         total_questions: {

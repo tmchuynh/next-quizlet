@@ -81,6 +81,10 @@ const QuizPage = () => {
             }
         };
 
+        const fetchAnswerData = async () => {
+
+        };
+
         fetchQuestionData();
     }, [currentTitle] );
 
@@ -95,7 +99,7 @@ const QuizPage = () => {
         const selectedAnswerData = currentQuestion.answers.find( ( answer: Answer ) => answer.answer_id === parseInt( selectedAnswer || '', 10 ) );
 
         if ( selectedAnswerData ) {
-            const isCorrect = selectedAnswerData.correct;
+            const isCorrect = selectedAnswerData.is_correct;
             setResult( isCorrect ? 'Correct!' : 'Wrong answer.' );
 
             // Update the score if the answer is correct
@@ -115,9 +119,9 @@ const QuizPage = () => {
 
     const handleWrittenAnswerSubmit = async () => {
         const currentQuestion = shuffledQuestions[currentQuestionIndex];
-        const correctAnswer = currentQuestion.answers.find( ( answer: Answer ) => answer.correct );
+        const correctAnswer = currentQuestion.answers.find( ( answer: Answer ) => answer.is_correct );
 
-        if ( correctAnswer && userInput.trim().toLowerCase() === correctAnswer.text.trim().toLowerCase() ) {
+        if ( correctAnswer && userInput.trim().toLowerCase() === correctAnswer.answer_text.trim().toLowerCase() ) {
             setResult( 'Correct!' );
             // Update the score if the answer is correct
             if ( scoreId ) {

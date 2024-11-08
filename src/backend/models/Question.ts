@@ -33,6 +33,11 @@ Question.init( {
     level: {
         type: DataTypes.INTEGER,
         allowNull: false,
+        references: {
+            model: 'quizzes',
+            key: 'level',
+        },
+        onDelete: 'CASCADE',
     },
 }, {
     sequelize,

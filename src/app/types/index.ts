@@ -28,8 +28,8 @@ export interface LeaderboardEntry {
 
 export interface Answer {
     answer_id: number;
-    text: string;
-    correct: boolean;
+    answer_text: string;
+    is_correct: boolean;
 }
 
 export interface Question {
