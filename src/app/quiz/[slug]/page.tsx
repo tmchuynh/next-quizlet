@@ -18,6 +18,8 @@ const QuizDifficultyPage: React.FC<QuizDifficultyPageProps> = ( { params } ) => 
     const [quizData, setQuizData] = useState<any>( null );
     const [difficultyLevels, setDifficultyLevels] = useState<number[]>( [] );
 
+    console.log( 'Quiz ID from /quiz/[slug]/:', quizId );
+
     useEffect( () => {
         const fetchQuizDetails = async () => {
             try {

@@ -13,22 +13,16 @@ const QuizSelectionPage: React.FC = () => {
     const [quizNames, setQuizNames] = useState<string[]>( [] );
     const { user, isLoading } = useUser();
 
-    console.log( 'User:', user );
-
     useEffect( () => {
         const fetchQuizNames = async () => {
             try {
                 const response = await fetch( "/api/quiz" );
                 if ( response.ok ) {
                     const data = await response.json();
-                    console.log( 'Fetched quiz names:', data );
 
                     const uniqueData = data.filter( ( item: { title: any; }, index: any, self: any[] ) =>
                         index === self.findIndex( ( t ) => t.title === item.title )
                     );
-
-                    // Log or use the filtered data
-                    console.log( 'Filtered unique data:', uniqueData );
 
                     setQuizzes( uniqueData );
 
@@ -48,10 +42,6 @@ const QuizSelectionPage: React.FC = () => {
     const handleQuizSelection = async ( quizName: string ) => {
         const quizTitle = quizNames.find( ( quiz ) => quiz === quizName ) || '';
         const quiz_id = quizzes.find( ( quiz ) => quiz.title === quizTitle )?.quiz_id || '';
-
-        console.log( 'Selected quiz title:', quizTitle );
-        console.log( 'Selected quiz id:', quiz_id );
-        console.log( "User logged in:", user?.sub );
 
         if ( !user?.sub || !quizTitle ) {
             console.error( 'User ID or quiz title is missing' );
@@ -78,8 +68,6 @@ const QuizSelectionPage: React.FC = () => {
             if ( !response.ok ) {
                 const errorData = await response.json();
                 console.error( 'Server responded with error:', errorData );
-
-
 
                 throw new Error( 'Failed to update quiz progress' );
             }

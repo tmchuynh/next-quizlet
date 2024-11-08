@@ -10,6 +10,9 @@ const DifficultySelectionPage: React.FC = () => {
     const { quizId } = useParams();
     const { user } = useUser();
 
+    console.log( 'Quiz ID:', quizId );
+    console.log( 'User:', user );
+
     const [quizData, setQuizData] = useState<QuizOption | null>( null );
     const [userProgress, setUserProgress] = useState<ProgressItem | null>( null );
 
@@ -22,10 +25,13 @@ const DifficultySelectionPage: React.FC = () => {
 
     const fetchQuizData = async () => {
         try {
-            const response = await fetch( `/api/quiz-levels/${ quizId }` );
-            if ( !response.ok ) throw new Error( 'Failed to fetch quiz data' );
-            const data = await response.json();
-            setQuizData( data );
+            const response = await fetch( `/api/quiz-details/${ quizId }` )
+                .then( data => { console.log( data ); } );
+            // if ( !response.ok ) throw new Error( 'Failed to fetch quiz data' );
+            // const data = await response.json();
+
+            // console.log( "Data", data );
+            // setQuizData( data );
         } catch ( error ) {
             console.error( 'Error fetching quiz data:', error );
         }
