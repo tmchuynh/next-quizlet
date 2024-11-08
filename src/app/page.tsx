@@ -14,7 +14,7 @@ const AuthPage = () => {
         if ( user ) {
 
 
-            router.push( `/${ user.sub }/dashboard` );
+            router.push( `/quiz` );
         } else {
             // If not logged in, direct to the login page
             router.push( '/api/auth/login' );
@@ -24,4 +24,4 @@ const AuthPage = () => {
     return null; // No UI elements, immediate redirection
 };
 
-export default AuthPage;
+export default AuthPage;;
