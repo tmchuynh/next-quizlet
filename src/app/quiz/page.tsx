@@ -80,7 +80,7 @@ const QuizSelectionPage: React.FC = () => {
 
 
     const getButtonClass = ( quizId: string ): string => {
-        const inProgress = quizProgress.some( ( item ) => item.quizId === quizId && item.currentQuestion > 0 );
+        const inProgress = quizProgress.some( ( item ) => item.quizId === quizId && item.current_question_index > 0 );
         return inProgress ? 'bg-amber-700 hover:bg-amber-600' : 'bg-zinc-700 hover:bg-zinc-600';
     };
 
