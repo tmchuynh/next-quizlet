@@ -1,52 +1,57 @@
-// app/quiz/[slug]/[difficulty]/result/page.tsx
+// app/quiz/[slug]/difficulty/[level]/result/page.tsx
 
-import React, { useEffect, useState } from 'react';
-import { useRouter } from 'next/router';
-import { Score } from '../../../../types';
+'use client';
 
-const ResultPage: React.FC = () => {
+import { useEffect, useState } from 'react';
+import { useSearchParams, useRouter, usePathname } from 'next/navigation';
+
+const ResultPage = () => {
+    const searchParams = useSearchParams();
     const router = useRouter();
-    const { slug, difficulty } = router.query;
-    const [score, setScore] = useState( 0 );
-    const [totalQuestions, setTotalQuestions] = useState( 0 );
+    const pathname = usePathname();
+
+    const segments = pathname.split( '/' ).filter( Boolean );
+    const currentTitle = segments.length > 1 ? decodeURIComponent( segments[1] ) : null;
+    const level = parseInt( segments[3], 10 );
+
+    const [score, setScore] = useState<number>( 0 );
+    const [totalQuestions, setTotalQuestions] = useState<number>( 0 );
 
     useEffect( () => {
-        if ( !slug || !difficulty ) return;
-        const quizData = JSON.parse( sessionStorage.getItem( 'currentQuizData' ) || '[]' );
-        const questions = quizData[parseInt( difficulty as string )] || [];
-        setTotalQuestions( questions.length );
+        const fetchScore = async () => {
+            const scoreId = searchParams.get( 'scoreId' );
+            if ( !scoreId ) {
+                console.error( 'Score ID is missing.' );
+                return;
+            }
 
-        const currentUserId = sessionStorage.getItem( 'currentUserId' );
-        const pastScoresKey = `quizScores_${ currentUserId }`;
-        const userScores: Score[] = JSON.parse( localStorage.getItem( pastScoresKey ) || '[]' );
+            try {
+                const res = await fetch( `/api/scores/${ scoreId }` );
+                const data = await res.json();
 
-        // Calculate and store final score
-        const finalScore = sessionStorage.getItem( 'finalScore' );
-        if ( finalScore ) {
-            setScore( parseInt( finalScore ) );
-        }
-
-        // Save the score in localStorage
-        const newScore: Score = {
-            score: parseInt( finalScore || '0' ),
-            total: questions.length,
-            quiz: slug as string,
-            difficultyLevel: parseInt( difficulty as string ),
-            date: new Date(),
+                if ( res.ok ) {
+                    setScore( data.score );
+                    setTotalQuestions( data.total_questions );
+                } else {
+                    console.error( 'Failed to fetch score:', data.error );
+                }
+            } catch ( error ) {
+                console.error( 'Error fetching score:', error );
+            }
         };
 
-        localStorage.setItem( pastScoresKey, JSON.stringify( [...userScores, newScore] ) );
-    }, [slug, difficulty] );
+        fetchScore();
+    }, [] );
 
     return (
-        <div className="result-page flex flex-col justify-center items-center px-6 py-4 lg:px-8 bg-gray-800 text-white">
-            <h2 className="text-3xl font-bold mb-4 text-center">Quiz Results</h2>
-            <p className="text-xl mb-4">You scored {score} out of {totalQuestions}</p>
+        <div className="flex flex-col min-h-full justify-center items-center px-6 py-4 lg:px-8 container border-4 border-gray-200 dark:border-gray-100 dark:bg-gray-800 dark:text-white rounded-2xl mx-auto my-4 w-full lg:w-11/12">
+            <h1 className="text-center text-2xl py-5 font-extrabold dark:text-white">Quiz Completed!</h1>
+            <p>Your Score: {score} out of {totalQuestions}</p>
             <button
-                onClick={() => router.push( `/quiz/${ slug }` )}
-                className="mt-4 bg-blue-700 hover:bg-blue-800 text-white font-medium rounded-lg px-5 py-2"
+                className="button text-white mx-3 flex-end bg-blue-700 hover:bg-blue-800 font-medium rounded-lg text-md px-5 py-2.5 text-center"
+                onClick={() => router.push( '/quiz' )}
             >
-                Back to Quiz Selection
+                Return to Home
             </button>
         </div>
     );
