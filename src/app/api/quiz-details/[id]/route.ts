@@ -1,12 +1,14 @@
 // src/app/api/quiz-details/route.ts
 import { NextResponse } from 'next/server';
 import { QueryTypes } from 'sequelize';
-import Quiz from '../../../backend/models/Quiz';
-import sequelize from '../../../backend/config/database';
+import Quiz from '../../../../backend/models/Quiz';
+import sequelize from '../../../../backend/config/database';
 
 export async function GET( request: Request ) {
     const { searchParams } = new URL( request.url );
     const quizId = searchParams.get( 'quizId' );
+
+    console.log( "QuizId: " + quizId );
 
     if ( !quizId ) {
         return NextResponse.json( { error: 'Quiz ID is required' }, { status: 400 } );
@@ -23,17 +25,15 @@ export async function GET( request: Request ) {
         }
 
         // Fetch levels associated with the quiz
-        const levels = await sequelize.query(
-            `SELECT DISTINCT level FROM questions WHERE quiz_id = :quizId ORDER BY level ASC`,
-            {
-                replacements: { quizId },
-                type: QueryTypes.SELECT,
-            }
-        );
+        const levels = await Quiz.findAndCountAll( {
+            where: { quiz_id: quizId },
+        } );
+
+        console.log( 'Fetched quiz details:', quiz );
 
         return NextResponse.json( {
             quiz,
-            levels: levels.map( ( lvl: any ) => lvl.level ),
+            levels.count
         } );
     } catch ( error ) {
         console.error( 'Error fetching quiz details:', error );
