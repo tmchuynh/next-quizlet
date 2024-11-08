@@ -2,10 +2,6 @@ import { DataTypes, Model } from 'sequelize';
 import sequelize from '../config/database';
 
 class Quiz extends Model {
-    public quiz_id!: number;
-    public title!: string;
-    public description!: string;
-    public level!: number;
 }
 
 Quiz.init(

@@ -1,6 +1,6 @@
 // src/routes/userRoutes.ts
 import express, { Request, Response } from 'express';
-import User from '../models/User';
+import { useUser } from '@auth0/nextjs-auth0/client';
 import { processUser } from '../controllers/userController';
 
 const router = express.Router();
@@ -35,16 +35,15 @@ router.post( '/register', async ( req: Request, res: Response ) => {
  * Route to get user profile by ID.
  */
 router.get( '/:id/dashboard', async ( req: Request, res: Response ) => {
-    try {
-        const userId = req.params.id;
-        const user = await User.findByPk( userId );
+    const { user } = useUser();
 
+    try {
         if ( !user ) {
             return res.status( 404 ).json( { error: 'User not found' } );
         }
 
         res.json( {
-            id: user.user_id,
+            id: user.sub,
             createdAt: user.created_at,
         } );
     } catch ( error ) {

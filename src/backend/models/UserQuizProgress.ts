@@ -6,13 +6,6 @@ import User from './User';
 import Quiz from './Quiz';
 
 class UserQuizProgress extends Model {
-    progress_id!: number;
-    user_id!: number;
-    quiz_id!: number;
-    current_question_index!: number;
-    score!: number;
-    completed!: boolean;
-    date_completed!: Date;
 }
 
 UserQuizProgress.init( {

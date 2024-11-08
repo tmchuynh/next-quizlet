@@ -5,11 +5,6 @@ import sequelize from '../config/database';
 import Quiz from './Quiz';
 
 class Question extends Model {
-    question_id!: number;
-    quiz_id!: number;
-    question_text!: string;
-    question_type!: 'multiple_choice' | 'true_false' | 'written';
-    level!: number;
 }
 
 Question.init( {

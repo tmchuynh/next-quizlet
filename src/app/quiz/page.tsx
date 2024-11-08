@@ -13,32 +13,32 @@ const QuizSelectionPage: React.FC = () => {
     const [quizNames, setQuizNames] = useState<string[]>( [] );
     const { user, isLoading } = useUser();
 
+    console.log( 'User:', user );
+
     useEffect( () => {
         const fetchQuizNames = async () => {
-            if ( user && user.sub ) {
-                try {
-                    const response = await fetch( "/api/quiz" );
-                    if ( response.ok ) {
-                        const data = await response.json();
-                        console.log( 'Fetched quiz names:', data );
+            try {
+                const response = await fetch( "/api/quiz" );
+                if ( response.ok ) {
+                    const data = await response.json();
+                    console.log( 'Fetched quiz names:', data );
 
-                        const uniqueData = data.filter( ( item: { title: any; }, index: any, self: any[] ) =>
-                            index === self.findIndex( ( t ) => t.title === item.title )
-                        );
+                    const uniqueData = data.filter( ( item: { title: any; }, index: any, self: any[] ) =>
+                        index === self.findIndex( ( t ) => t.title === item.title )
+                    );
 
-                        // Log or use the filtered data
-                        console.log( 'Filtered unique data:', uniqueData );
+                    // Log or use the filtered data
+                    console.log( 'Filtered unique data:', uniqueData );
 
-                        setQuizzes( uniqueData );
+                    setQuizzes( uniqueData );
 
 
-                        setQuizNames( uniqueData.map( ( quiz: { title: any; } ) => quiz.title ) );
-                    } else {
-                        console.error( 'Failed to fetch quiz names: HTTP status', response.status );
-                    }
-                } catch ( error ) {
-                    console.error( 'Error fetching quiz names:', error );
+                    setQuizNames( uniqueData.map( ( quiz: { title: any; } ) => quiz.title ) );
+                } else {
+                    console.error( 'Failed to fetch quiz names: HTTP status', response.status );
                 }
+            } catch ( error ) {
+                console.error( 'Error fetching quiz names:', error );
             }
         };
 
@@ -49,8 +49,9 @@ const QuizSelectionPage: React.FC = () => {
         const quizTitle = quizNames.find( ( quiz ) => quiz === quizName ) || '';
         const quiz_id = quizzes.find( ( quiz ) => quiz.title === quizTitle )?.quiz_id || '';
 
-        console.log( 'Selected quiz:', quizTitle );
-        console.log( 'Selected quiz:', quiz_id );
+        console.log( 'Selected quiz title:', quizTitle );
+        console.log( 'Selected quiz id:', quiz_id );
+        console.log( "User logged in:", user?.sub );
 
         if ( !user?.sub || !quizTitle ) {
             console.error( 'User ID or quiz title is missing' );
@@ -64,8 +65,8 @@ const QuizSelectionPage: React.FC = () => {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify( {
-                    userId: user.sub, // Ensure this is defined and correct
-                    title: quizTitle, // Pass the correct quiz title
+                    userId: user.sub,
+                    title: quizTitle,
                     quizId: quiz_id,
                     currentQuestionIndex: 0,
                     score: 0,

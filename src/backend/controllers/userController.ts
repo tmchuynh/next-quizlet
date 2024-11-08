@@ -185,17 +185,10 @@ export async function getUserByNickname( name: string ) {
 
 export async function addUserToDatabase( user_id: any ) {
     try {
-        // Check if user already exists in the database
-        let user = await User.findOne( { where: { user_id } } );
-
-        if ( !user ) {
-            // If user doesn't exist, create a new entry
-            const date = new Date();
-            user = await User.create( { user_id, created_at: date } );
-            console.log( "User added to database:", user );
-        } else {
-            console.log( "User already exists in database:", user );
-        }
+        // If user doesn't exist, create a new entry
+        const date = new Date();
+        const user = await User.create( { user_id, created_at: date } );
+        console.log( "User added to database:", user );
 
         return user;
     } catch ( error ) {

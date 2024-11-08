@@ -12,7 +12,8 @@ const AuthPage = () => {
         if ( isLoading ) return; // Wait until Auth0 finishes loading
 
         if ( user ) {
-            // Redirect to the user's dashboard using their unique identifier
+
+
             router.push( `/${ user.sub }/dashboard` );
         } else {
             // If not logged in, direct to the login page

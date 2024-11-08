@@ -6,6 +6,7 @@ import "./styles.css";
 import { UserProvider } from "@auth0/nextjs-auth0/client";
 import Header from "./components/Header";
 import auth0 from 'auth0-js';
+import dotenv from 'dotenv';
 import Head from "next/head";
 import { NotFoundProvider, useNotFound } from "../context/NotFoundContext";
 
@@ -14,12 +15,19 @@ export default function RootLayout( {
 }: {
     children: React.ReactNode;
 } ) {
+    dotenv.config();
+
     const clientID = process.env.NEXT_PUBLIC_AUTH0_CLIENT_ID || "";
     const domain = process.env.NEXT_PUBLIC_AUTH0_DOMAIN || "";
-    const auth0Tenant = process.env.AUTH0_TENANT || "";
+    const auth0Tenant = process.env.PUBLC_AUTH0_TENANT || "";
     const authorizationServer = {
-        issuer: process.env.CUSTOM_DOMAIN || ""
+        issuer: process.env.NEXT_PUBLIC_CUSTOM_DOMAIN || ""
     };
+
+    console.log( `Client ID: ${ clientID }` );
+    console.log( `Domain: ${ domain }` );
+    console.log( `Auth0 Tenant: ${ auth0Tenant }` );
+    console.log( `Authorization Server Issuer: ${ authorizationServer.issuer }` );
 
     useEffect( () => {
         const loadAuth0Script = () => {
@@ -41,20 +49,20 @@ export default function RootLayout( {
         loadAuth0Script()
             .then( () => {
                 if ( window.auth0 ) {
-                    const webAuth = new auth0.WebAuth( {
+                    const webAuth = new window.auth0.WebAuth( {
                         domain,
                         clientID,
                         redirectUri: `${ process.env.AUTH0_BASE_URL }/api/auth/callback`,
                         responseType: "token id_token",
                         scope: "openid profile email",
                         overrides: {
-                            __tenant: auth0Tenant,
+                            __tenant: "dev-gn623zdfoivws5w1",
                             __token_issuer: authorizationServer.issuer
                         },
                     } );
 
                     try {
-                        webAuth.crossOriginVerification();
+                        webAuth.crossOriginAuthentication;
                     } catch ( error ) {
                         console.error( "Error executing crossOriginVerification:", error );
                     }
