@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS quizzes (
     quiz_id INT AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(100) NOT NULL,
     description TEXT,
-    level INT NOT NULL,
+    level INT NOT NULL DEFAULT 1,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -28,8 +28,8 @@ CREATE TABLE IF NOT EXISTS questions (
         'multiple_choice',
         'true_false',
         'written'
-    ) NOT NULL,
-    level INT NOT NULL,
+    ) NOT NULL DEFAULT 'multiple_choice',
+    level INT NOT NULL DEFAULT 1,
     FOREIGN KEY (quiz_id) REFERENCES quizzes (quiz_id) ON DELETE CASCADE
 );
 
@@ -46,24 +46,14 @@ CREATE TABLE IF NOT EXISTS answers (
 CREATE TABLE IF NOT EXISTS user_quiz_progress (
     progress_id INT AUTO_INCREMENT PRIMARY KEY,
     user_id VARCHAR(250) NOT NULL,
-    quiz_id INT NOT NULL,
-    level INT NOT NULL,
+    title VARCHAR(100) NOT NULL,
+    level INT NOT NULL DEFAULT 1,
     current_question_index INT DEFAULT 0,
-    score INT DEFAULT 0,
+    score INT NOT NULL DEFAULT 0,
     completed BOOLEAN DEFAULT FALSE,
-    date_completed TIMESTAMP NULL,
+    date_completed TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users (user_id) ON DELETE CASCADE,
-    FOREIGN KEY (quiz_id) REFERENCES quizzes (quiz_id) ON DELETE CASCADE
-);
-
--- Create user_activity table
-CREATE TABLE IF NOT EXISTS user_activity (
-    activity_id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id VARCHAR(250) NOT NULL,
-    quiz_date DATE NOT NULL,
-    quizzes_completed INT DEFAULT 0,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users (user_id) ON DELETE CASCADE
+    FOREIGN KEY (title) REFERENCES quizzes (title) ON DELETE CASCADE
 );
 
 -- Create scores table
@@ -71,10 +61,11 @@ CREATE TABLE IF NOT EXISTS scores (
     score_id INT AUTO_INCREMENT PRIMARY KEY,
     user_id VARCHAR(250) NOT NULL,
     quiz_id INT NOT NULL,
-    level INT NOT NULL,
-    score INT NOT NULL,
+    level INT NOT NULL DEFAULT 1,
+    score INT NOT NULL DEFAULT 0,
     total_questions INT NOT NULL,
     quiz_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users (user_id) ON DELETE CASCADE,
-    FOREIGN KEY (quiz_id) REFERENCES quizzes (quiz_id) ON DELETE CASCADE
+    FOREIGN KEY (quiz_id, level) REFERENCES quizzes (quiz_id, level) ON DELETE CASCADE,
+    FOREIGN KEY (score) REFERENCES user_quiz_progress (score) ON DELETE CASCADE
 );
