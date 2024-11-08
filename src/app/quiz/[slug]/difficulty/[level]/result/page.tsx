@@ -20,6 +20,8 @@ const ResultPage = () => {
     useEffect( () => {
         const fetchScore = async () => {
             const scoreId = searchParams.get( 'scoreId' );
+
+            console.log( 'Fetching score with ID:', scoreId );
             if ( !scoreId ) {
                 console.error( 'Score ID is missing.' );
                 return;

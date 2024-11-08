@@ -1,14 +1,18 @@
-// app/api/scores/[id]/route.ts
+// app/api/scores/[scoreId]/route.ts
 
 import { NextResponse } from 'next/server';
-import { Score } from '../../../../backend/models/index';
+import { Score } from '../../../../backend/models';
 
 export async function GET(
+    request: Request,
     { params }: { params: { scoreId: string; }; }
 ) {
     try {
         const { scoreId } = params;
-        const score = await Score.findByPk( scoreId );
+
+        const score = await Score.findAll( {
+            where: { score_id: scoreId },
+        } );
 
         if ( !score ) {
             return NextResponse.json( { error: 'Score not found.' }, { status: 404 } );
