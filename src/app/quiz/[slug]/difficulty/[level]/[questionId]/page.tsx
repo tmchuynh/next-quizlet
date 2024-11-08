@@ -18,15 +18,11 @@ const QuizPage = () => {
     const question_id = parseInt( segments[4] );
 
     const [questions, setQuestions] = useState<Question[]>( [] );
-    const [answers, setAnswers] = useState<Answer[]>( [] );
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState( 0 );
     const [shuffledQuestions, setShuffledQuestions] = useState<Question[]>( [] );
-    const [shuffledAnswers, setShuffledAnswers] = useState<Answer[]>( [] );
     const [scoreId, setScoreId] = useState<number | null>( null );
-    const [selectedAnswer, setSelectedAnswer] = useState<string | null>( null );
     const [userInput, setUserInput] = useState<string>( '' );
     const [result, setResult] = useState<string | null>( null );
-    const [isSubmitting, setIsSubmitting] = useState( false );
 
     useEffect( () => {
         const fetchQuestionData = async () => {
@@ -46,8 +42,6 @@ const QuizPage = () => {
                     const questionsRes = await fetch( `/api/quizzes/${ currentTitle }/difficulty/${ level }/questions` );
                     const questionsData = await questionsRes.json();
 
-                    console.log( 'Questions:', questionsData );
-
                     if ( questionsData.error ) {
                         console.error( 'Error fetching questions:', questionsData.error );
                         return;
@@ -58,22 +52,6 @@ const QuizPage = () => {
                     setShuffledQuestions( questionsShuffled );
                     setQuestions( questionsShuffled );
 
-
-                    // Fetch questions for the quiz
-                    const answersRes = await fetch( `/api/quizzes/${ currentTitle }/difficulty/${ level }/answers` );
-                    const answersData = await answersRes.json();
-
-                    console.log( 'Answers:', answersData );
-
-                    if ( questionsData.error ) {
-                        console.error( 'Error fetching questions:', answersData.error );
-                        return;
-                    }
-
-                    // Shuffle questions
-                    const answersShuffled = answersData.questions.sort( () => Math.random() - 0.5 );
-                    setShuffledAnswers( answersShuffled );
-                    setAnswers( answersShuffled );
 
                     // Initialize score
                     if ( questionsShuffled.length > 0 && !scoreId ) {
@@ -112,49 +90,27 @@ const QuizPage = () => {
             }
         };
 
-
-
         fetchQuestionData();
 
     }, [currentTitle] );
 
     const currentQuestion = shuffledQuestions[currentQuestionIndex];
     if ( !currentQuestion ) return <div>Loading...</div>;
-    console.log( currentQuestion );
-    console.log( 'Question ID:', currentQuestion.question_id );
-    console.log( 'Question Text:', currentQuestion.question_text );
-    console.log( 'Question Type:', currentQuestion.question_type );
+    console.log( "CURRENT QUESTION", currentQuestion );
 
+    const handleSubmitAnswer = async ( correct: boolean ) => {
 
-    const handleAnswerSelect = ( answerId: string ) => {
-        setSelectedAnswer( answerId );
-    };
-
-    const handleSubmitAnswer = async () => {
-        setIsSubmitting( true );
-
-        const currentQuestion = shuffledQuestions[currentQuestionIndex];
-        const selectedAnswerData = currentQuestion.answers.find(
-            ( answer: Answer ) => answer.answer_id === parseInt( selectedAnswer || '', 10 )
-        );
-
-        if ( selectedAnswerData ) {
-            const isCorrect = selectedAnswerData.is_correct;
-            setResult( isCorrect ? 'Correct!' : 'Wrong answer.' );
+        if ( correct ) {
 
             // Update the score if the answer is correct
-            if ( isCorrect && scoreId ) {
+            if ( scoreId ) {
                 await fetch( '/api/scores/update', {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify( { score_id: scoreId, increment: 1 } ),
                 } );
             }
-        } else {
-            setResult( 'Please select an answer.' );
         }
-
-        setIsSubmitting( false );
     };
 
     const handleWrittenAnswerSubmit = async () => {
@@ -182,7 +138,6 @@ const QuizPage = () => {
 
 
     const goToNextQuestion = () => {
-        setSelectedAnswer( null );
         setUserInput( '' );
         setResult( null );
 
@@ -197,37 +152,45 @@ const QuizPage = () => {
 
     return (
         <div className="flex flex-col min-h-full justify-center items-center px-6 py-4 lg:px-8 container border-4 border-gray-200 dark:border-gray-100 dark:bg-gray-800 dark:text-white rounded-2xl mx-auto my-4 w-full lg:w-11/12">
-            <h1>{currentQuestion.question_type}</h1>
-            {currentQuestion.question_type === 'multiple_choice' ? (
-                <div>
-                    <button
-                        key={answer.answer_id}
-                        onClick={() => handleAnswerSelect( answer.answer_id.toString() )}
-                        disabled={isSubmitting}
-                    >
-                        {answer.text}
-                    </button>
-                    <button onClick={handleSubmitAnswer} disabled={isSubmitting}>
-                        Submit Answer
+            <h1 className="text-center text-2xl py-5 font-extrabold dark:text-white">{currentQuestion.question_text}</h1>
+            {currentQuestion.question_type === 'multiple_choice' || currentQuestion.question_type == "true_false" ? (
+                <div className='w-full flex flex-col'>
+                    <div className="grid grid-cols-2 gap-4 p-3">
+                        {currentQuestion.answers.map( ( answers ) => (
+                            <button className="button text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none font-medium rounded-lg text-md w-full sm:w-auto px-5 py-2.5 text-center"
+                                key={answers.answer_id}
+                                onClick={() => handleSubmitAnswer( answers.is_correct )}
+                            >
+                                {answers.answer_text}
+                            </button>
+                        ) )}
+
+                    </div>
+                    <button className="button text-white mx-3 flex-end bg-green-700 hover:bg-green-800 focus:ring-4 focus:outline-none font-medium rounded-lg text-md px-5 py-2.5 text-center" onClick={goToNextQuestion}>
+                        Next Question
                     </button>
                 </div>
             ) : (
-                <div>
-                    <input
-                        type="text"
-                        value={userInput}
-                        onChange={( e ) => setUserInput( e.target.value )}
-                        disabled={isSubmitting}
-                    />
-                    <button onClick={handleWrittenAnswerSubmit} disabled={isSubmitting}>
-                        Submit Answer
+                <div className='w-full flex flex-col'>
+                    <div className="grid grid-cols-1 p-3">
+                        <label className="block mb-2 text-md font-medium text-gray-900 dark:text-white">Input your answer</label>
+                        <input
+                            className='bg-gray-50 border-2 border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500'
+                            type="text"
+                            value={userInput}
+                            onKeyDown={( e ) => {
+                                if ( e.key === 'Enter' ) {
+                                    handleWrittenAnswerSubmit();
+                                }
+                            }}
+                        />
+                    </div>
+                    <button className="button text-white mx-3 flex-end bg-green-700 hover:bg-green-800 focus:ring-4 focus:outline-none font-medium rounded-lg text-md px-5 py-2.5 text-center" onClick={goToNextQuestion} >
+                        Next Question
                     </button>
                 </div>
             )}
             {result && <div>{result}</div>}
-            <button onClick={goToNextQuestion} disabled={isSubmitting || !result}>
-                Next Question
-            </button>
         </div>
     );
 };

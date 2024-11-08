@@ -35,6 +35,7 @@ export interface Answer {
 }
 
 export interface Question {
+    answers: Answer[];
     question_id: number;
     quiz_id: string;
     question_type: string;
