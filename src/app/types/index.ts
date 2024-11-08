@@ -4,7 +4,7 @@ export interface User {
 }
 
 export interface ProgressItem {
-    currentQuestion: number;
+    current_question_index: number;
     score: number;
     quizId: string;
     level: number;

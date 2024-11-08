@@ -15,7 +15,7 @@ interface QuizLevel {
 const DifficultySelectionPage: React.FC = () => {
     const [isMounted, setIsMounted] = useState( false );
     const [quizData, setQuizData] = useState<QuizLevel[]>( [] );
-    const [userProgress, setUserProgress] = useState<ProgressItem | null>( null );
+    const [userProgress, setUserProgress] = useState<ProgressItem[]>( [] );
 
     const router = useRouter();
     const pathname = usePathname();
@@ -68,8 +68,8 @@ const DifficultySelectionPage: React.FC = () => {
         if ( quizData.length > 0 ) {
             const quizId = quizData[0].quiz_id; // Use the first quiz's ID for routing (assuming same ID for levels)
             if ( quizData ) {
-                const currentQuestionId = userProgress?.currentQuestion;
-                router.push( `/quiz/${ currentTitle }/difficulty/${ currentQuestionId }` );
+                console.log( 'Current question ID:', userProgress );
+                router.push( `/quiz/${ currentTitle }/difficulty/${ userProgress[0].current_question_index }` );
             } else {
                 router.push( `/quiz/${ currentTitle }/difficulty/${ level }` );
             }
