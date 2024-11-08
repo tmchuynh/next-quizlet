@@ -1,5 +1,4 @@
 import Quiz from '../../../backend/models/Quiz';
-import UserQuizProgress from '../../../backend/models/UserQuizProgress';
 import { NextResponse } from 'next/server';
 
 /**

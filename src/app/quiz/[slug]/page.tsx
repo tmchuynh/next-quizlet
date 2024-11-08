@@ -53,7 +53,7 @@ const QuizDifficultyPage: React.FC<QuizDifficultyPageProps> = ( { params } ) => 
         const isInProgress = progress.some(
             ( item ) =>
                 item.quizId === quizId &&
-                item.currentQuestion > 0 &&
+                item.current_question_index > 0 &&
                 item.difficultyLevel === level
         );
         return isInProgress ? 'bg-amber-700 hover:bg-amber-600' : 'bg-zinc-700 hover:bg-zinc-600';

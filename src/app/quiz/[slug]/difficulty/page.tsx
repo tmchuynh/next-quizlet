@@ -45,7 +45,6 @@ const DifficultySelectionPage: React.FC = () => {
             const response = await fetch( `/api/quiz-details?title=${ encodeURIComponent( title ) }` );
             if ( !response.ok ) throw new Error( 'Failed to fetch quiz data' );
             const data: QuizLevel[] = await response.json();
-            console.log( 'Quiz data:', data );
             setQuizData( data );
         } catch ( error ) {
             console.error( 'Error fetching quiz data:', error );
@@ -58,7 +57,6 @@ const DifficultySelectionPage: React.FC = () => {
             if ( !response.ok ) throw new Error( 'Failed to fetch user progress' );
             const data = await response.json();
             setUserProgress( data );
-            console.log( 'User progress:', data );
         } catch ( error ) {
             console.error( 'Error fetching user progress:', error );
         }
@@ -66,9 +64,7 @@ const DifficultySelectionPage: React.FC = () => {
 
     const handleLevelSelection = ( level: number ) => {
         if ( quizData.length > 0 ) {
-            const quizId = quizData[0].quiz_id; // Use the first quiz's ID for routing (assuming same ID for levels)
             if ( quizData ) {
-                console.log( 'Current question ID:', userProgress );
                 router.push( `/quiz/${ currentTitle }/difficulty/${ userProgress[0].current_question_index }` );
             } else {
                 router.push( `/quiz/${ currentTitle }/difficulty/${ level }` );

@@ -5,16 +5,18 @@
 import { usePathname, useRouter } from 'next/navigation';
 import { Answer, Question } from '../../../../types/index';
 import { useEffect, useState } from 'react';
+import { useUser } from '@auth0/nextjs-auth0/client';
+import Quiz from '../../../../../backend/models/Quiz';
 
 
 const QuizPage = () => {
     const router = useRouter();
     const pathname = usePathname();
+    const { user } = useUser();
 
     const segments = pathname.split( '/' ).filter( Boolean );
     let currentTitle = segments.length > 1 ? decodeURIComponent( segments[1] ) : null;
     let current_question_index = parseInt( segments[3], 10 );
-
 
     const [questions, setQuestions] = useState<Question[]>( [] );
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState( 0 );
@@ -24,6 +26,11 @@ const QuizPage = () => {
     const [userInput, setUserInput] = useState<string>( '' );
     const [result, setResult] = useState<string | null>( null );
     const [isSubmitting, setIsSubmitting] = useState( false );
+    const [scoreId, setScoreId] = useState<number | null>( null );
+
+    const quiz = Quiz.findOne( {
+        where: { title: currentTitle },
+    } );
 
     useEffect( () => {
         const fetchQuestions = async () => {
@@ -57,6 +64,27 @@ const QuizPage = () => {
                     console.error( "Error fetching data:", error );
                 }
             }
+            if ( shuffledQuestions.length > 0 && !scoreId ) {
+                initializeScore();
+            }
+        };
+        const initializeScore = async () => {
+            try {
+                const userId = user?.sub; // Implement this based on your auth system
+                const quizId = quiz.quiz_id; // Implement based on your URL structure
+                const totalQuestions = shuffledQuestions.length;
+
+                const res = await fetch( '/api/scores/init', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify( { user_id: userId, quiz_id: quizId, total_questions: totalQuestions } ),
+                } );
+
+                const data = await res.json();
+                setScoreId( data.score_id );
+            } catch ( error ) {
+                console.error( 'Failed to initialize score:', error );
+            }
         };
 
         fetchQuestions();
@@ -68,17 +96,23 @@ const QuizPage = () => {
 
     const handleSubmitAnswer = async () => {
         setIsSubmitting( true );
-        const currentQuestion = questions[currentQuestionIndex];
+        const currentQuestion = shuffledQuestions[currentQuestionIndex];
         const currentAnswers = answers[currentQuestionIndex];
 
-        console.log( "Selected answer:", selectedAnswer );
-        console.log( "Current question:", currentQuestion );
-
-        const selectedAnswerData = currentAnswers.find( ( answer: { id: string | null; } ) => answer.id === selectedAnswer );
+        const selectedAnswerData = currentAnswers.find( answer => answer.id === selectedAnswer );
 
         if ( selectedAnswerData ) {
             const isCorrect = selectedAnswerData.is_correct;
-            setResult( isCorrect ? "Correct!" : "Wrong answer. Try again." );
+            setResult( isCorrect ? "Correct!" : "Wrong answer." );
+
+            // Update the score if the answer is correct
+            if ( isCorrect && scoreId ) {
+                await fetch( '/api/scores/update', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify( { score_id: scoreId, increment: 1 } ),
+                } );
+            }
         } else {
             setResult( "Please select an answer." );
         }
@@ -86,14 +120,22 @@ const QuizPage = () => {
         setIsSubmitting( false );
     };
 
-    const handleWrittenAnswerSubmit = () => {
-        const currentQuestion = questions[currentQuestionIndex];
-        const correctAnswer = answers[currentQuestionIndex].find( ( answer: { is_correct: any; } ) => answer.is_correct );
+    const handleWrittenAnswerSubmit = async () => {
+        const currentQuestion = shuffledQuestions[currentQuestionIndex];
+        const correctAnswer = answers[currentQuestionIndex].find( answer => answer.is_correct );
 
-        if ( correctAnswer && userInput.trim().toLowerCase() === correctAnswer.text.trim().toLowerCase() ) {
+        if ( correctAnswer && userInput.trim().toLowerCase() === correctAnswer.answer_text.trim().toLowerCase() ) {
             setResult( "Correct!" );
+            // Update the score if the answer is correct
+            if ( scoreId ) {
+                await fetch( '/api/scores/update', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify( { score_id: scoreId, increment: 1 } ),
+                } );
+            }
         } else {
-            setResult( "Wrong answer. Try again." );
+            setResult( "Wrong answer." );
         }
     };
 
@@ -101,12 +143,13 @@ const QuizPage = () => {
         setSelectedAnswer( null );
         setUserInput( '' );
         setResult( null );
-        if ( currentQuestionIndex < questions.length - 1 ) {
-            setCurrentQuestionIndex( currentQuestionIndex + 1 );
+
+        if ( currentQuestionIndex < shuffledQuestions.length - 1 ) {
+            const nextQuestionIndex = currentQuestionIndex + 1;
+            router.push( `/quiz/${ currentTitle }/difficulty/${ nextQuestionIndex }` );
         } else {
             // Quiz is finished
-            alert( "Quiz completed!" );
-            router.push( '/' ); // Redirect to home or summary page
+            router.push( `/quiz/${ currentTitle }/difficulty/result?scoreId=${ scoreId }` );
         }
     };
 

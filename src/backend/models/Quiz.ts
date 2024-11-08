@@ -2,6 +2,7 @@ import { DataTypes, Model } from 'sequelize';
 import sequelize from '../config/database';
 
 class Quiz extends Model {
+    quiz_id: number | undefined;
 }
 
 Quiz.init(

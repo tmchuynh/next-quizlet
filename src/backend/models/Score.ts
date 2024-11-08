@@ -1,8 +1,9 @@
 import { DataTypes, Model } from 'sequelize';
 import sequelize from '../config/database';
-import Quiz from './Quiz'; // Ensure this path is correct
 
 class Score extends Model {
+    score_id: number | undefined;
+    score: number | undefined;
 }
 
 Score.init(

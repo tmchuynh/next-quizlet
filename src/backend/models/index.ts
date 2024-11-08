@@ -6,6 +6,7 @@ import Answer from './Answer';
 import UserQuizProgress from './UserQuizProgress';
 import UserActivity from './UserActivity';
 import Score from './Score';
+import sequelize from '../config/database';
 
 // Define relationships
 User.hasMany( UserQuizProgress, { foreignKey: 'user_id' } );
@@ -29,4 +30,20 @@ UserQuizProgress.belongsTo( Quiz, { foreignKey: 'quiz_id' } );
 Quiz.hasMany( Score, { foreignKey: 'quiz_id' } );
 Score.belongsTo( Quiz, { foreignKey: 'quiz_id' } );
 
-export default { User, Quiz, Question, Answer, UserQuizProgress, UserActivity, Score };
+Question.belongsTo( Quiz, { foreignKey: 'quiz_id', as: 'quiz' } );
+Quiz.hasMany( Question, { foreignKey: 'quiz_id', as: 'questions' } );
+
+Answer.belongsTo( Question, { foreignKey: 'question_id', as: 'question' } );
+Question.hasMany( Answer, { foreignKey: 'question_id', as: 'answers' } );
+
+Score.belongsTo( User, { foreignKey: 'user_id', as: 'user' } );
+User.hasMany( Score, { foreignKey: 'user_id', as: 'scores' } );
+
+Score.belongsTo( Quiz, { foreignKey: 'quiz_id', as: 'quiz' } );
+Quiz.hasMany( Score, { foreignKey: 'quiz_id', as: 'scores' } );
+
+sequelize.sync().then( () => {
+    console.log( 'Database & tables created!' );
+} );
+
+export default { sequelize, User, Quiz, Question, Answer, UserQuizProgress, UserActivity, Score };
