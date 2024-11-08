@@ -29,7 +29,7 @@ export default function NotFound() {
                     <span className={styles.digit}>{digits.third}</span>
                 </div>
                 <p className={styles.message}>Oops! The page you're looking for doesn't exist.</p>
-                <Link href="/" className={styles.backHomeLink}>
+                <Link href="/quiz" className={styles.backHomeLink}>
                     Go back to Home
                 </Link>
             </div>
