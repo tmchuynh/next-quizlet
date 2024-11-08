@@ -1,11 +1,8 @@
 import { DataTypes, Model } from 'sequelize';
 import sequelize from '../config/database';
 
-class Quiz extends Model {
-    quiz_id: number | undefined;
-}
-
-Quiz.init(
+const Quiz = sequelize.define(
+    'Quiz',
     {
         quiz_id: {
             type: DataTypes.INTEGER,
@@ -22,11 +19,14 @@ Quiz.init(
         level: {
             type: DataTypes.INTEGER,
             allowNull: false,
+            defaultValue: 1,
+        },
+        created_at: {
+            type: DataTypes.DATE,
+            defaultValue: DataTypes.NOW,
         },
     },
     {
-        sequelize,
-        modelName: 'Quiz',
         tableName: 'quizzes',
         timestamps: false,
     }

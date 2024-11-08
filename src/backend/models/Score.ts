@@ -1,17 +1,10 @@
 import { DataTypes, Model } from 'sequelize';
 import sequelize from '../config/database';
+import User from './User';
+import Quiz from './Quiz';
 
-class Score extends Model {
-    score_id?: number | undefined;
-    score: number | undefined;
-    user_id: string | undefined;
-    quiz_id: string | undefined;
-    total_questions: number | undefined;
-    quiz_date: Date | undefined;
-    level: number | undefined;
-}
-
-Score.init(
+const Score = sequelize.define(
+    'Score',
     {
         score_id: {
             type: DataTypes.INTEGER,
@@ -25,7 +18,6 @@ Score.init(
                 model: 'users',
                 key: 'user_id',
             },
-            onDelete: 'CASCADE',
         },
         quiz_id: {
             type: DataTypes.INTEGER,
@@ -34,21 +26,16 @@ Score.init(
                 model: 'quizzes',
                 key: 'quiz_id',
             },
-            onDelete: 'CASCADE',
         },
         level: {
             type: DataTypes.INTEGER,
             allowNull: false,
-            references: {
-                model: 'quizzes',
-                key: 'level',
-            },
-            onDelete: 'CASCADE',
+            defaultValue: 1,
         },
         score: {
             type: DataTypes.INTEGER,
-            defaultValue: 0,
             allowNull: false,
+            defaultValue: 0,
         },
         total_questions: {
             type: DataTypes.INTEGER,
@@ -60,11 +47,16 @@ Score.init(
         },
     },
     {
-        sequelize,
-        modelName: 'Score',
         tableName: 'scores',
         timestamps: false,
     }
 );
+
+// Associations
+Score.belongsTo( User, { foreignKey: 'user_id', onDelete: 'CASCADE' } );
+User.hasMany( Score, { foreignKey: 'user_id', onDelete: 'CASCADE' } );
+
+Score.belongsTo( Quiz, { foreignKey: 'quiz_id', onDelete: 'CASCADE' } );
+Quiz.hasMany( Score, { foreignKey: 'quiz_id', onDelete: 'CASCADE' } );
 
 export default Score;

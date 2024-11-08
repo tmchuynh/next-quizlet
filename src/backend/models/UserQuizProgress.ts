@@ -5,58 +5,65 @@ import sequelize from '../config/database';
 import User from './User';
 import Quiz from './Quiz';
 
-class UserQuizProgress extends Model {
-}
+const UserQuizProgress = sequelize.define(
+    'UserQuizProgress',
+    {
+        progress_id: {
+            type: DataTypes.INTEGER,
+            autoIncrement: true,
+            primaryKey: true,
+        },
+        user_id: {
+            type: DataTypes.STRING( 250 ),
+            allowNull: false,
+            references: {
+                model: 'users',
+                key: 'user_id',
+            },
+        },
+        title: {
+            type: DataTypes.STRING( 100 ),
+            allowNull: false,
+            references: {
+                model: 'quizzes',
+                key: 'title',
+            },
+        },
+        level: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            defaultValue: 1,
+        },
+        current_question_index: {
+            type: DataTypes.INTEGER,
+            defaultValue: 0,
+        },
+        score: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            defaultValue: 0,
+        },
+        completed: {
+            type: DataTypes.BOOLEAN,
+            defaultValue: false,
+        },
+        date_completed: {
+            type: DataTypes.DATE,
+            defaultValue: DataTypes.NOW,
+        },
+    },
+    {
+        tableName: 'user_quiz_progress',
+        timestamps: false,
+    }
+);
 
-UserQuizProgress.init( {
-    progress_id: {
-        type: DataTypes.INTEGER,
-        autoIncrement: true,
-        primaryKey: true,
-    },
-    user_id: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        references: {
-            model: User,
-            key: 'user_id',
-        },
-        onDelete: 'CASCADE',
-    },
-    quiz_id: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        references: {
-            model: Quiz,
-            key: 'quiz_id',
-        },
-        onDelete: 'CASCADE',
-    },
-    current_question_index: {
-        type: DataTypes.INTEGER,
-        defaultValue: 0,
-    },
-    level: {
-        type: DataTypes.INTEGER,
-        defaultValue: 1,
-    },
-    score: {
-        type: DataTypes.INTEGER,
-        defaultValue: 0,
-    },
-    completed: {
-        type: DataTypes.BOOLEAN,
-        defaultValue: false,
-    },
-    date_completed: {
-        type: DataTypes.DATE,
-        allowNull: true,
-    },
-}, {
-    sequelize,
-    modelName: 'UserQuizProgress',
-    tableName: 'user_quiz_progress',
-    timestamps: false,
-} );
+// Associations
+UserQuizProgress.belongsTo( User, { foreignKey: 'user_id', onDelete: 'CASCADE' } );
+User.hasMany( UserQuizProgress, { foreignKey: 'user_id', onDelete: 'CASCADE' } );
+
+UserQuizProgress.belongsTo( Quiz, { foreignKey: 'title', targetKey: 'title', onDelete: 'CASCADE' } );
+Quiz.hasMany( UserQuizProgress, { foreignKey: 'title', sourceKey: 'title', onDelete: 'CASCADE' } );
+
 
 export default UserQuizProgress;

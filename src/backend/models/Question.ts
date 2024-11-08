@@ -4,46 +4,45 @@ import { DataTypes, Model } from 'sequelize';
 import sequelize from '../config/database';
 import Quiz from './Quiz';
 
-class Question extends Model {
-}
+const Question = sequelize.define(
+    'Question',
+    {
+        question_id: {
+            type: DataTypes.INTEGER,
+            autoIncrement: true,
+            primaryKey: true,
+        },
+        quiz_id: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            references: {
+                model: 'quizzes',
+                key: 'quiz_id',
+            },
+        },
+        question_text: {
+            type: DataTypes.TEXT,
+            allowNull: false,
+        },
+        question_type: {
+            type: DataTypes.ENUM( 'multiple_choice', 'true_false', 'written' ),
+            allowNull: false,
+            defaultValue: 'multiple_choice',
+        },
+        level: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            defaultValue: 1,
+        },
+    },
+    {
+        tableName: 'questions',
+        timestamps: false,
+    }
+);
 
-Question.init( {
-    question_id: {
-        type: DataTypes.INTEGER,
-        autoIncrement: true,
-        primaryKey: true,
-    },
-    quiz_id: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        references: {
-            model: Quiz,
-            key: 'quiz_id',
-        },
-        onDelete: 'CASCADE',
-    },
-    question_text: {
-        type: DataTypes.TEXT,
-        allowNull: false,
-    },
-    question_type: {
-        type: DataTypes.ENUM( 'multiple_choice', 'true_false', 'written' ),
-        allowNull: false,
-    },
-    level: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        references: {
-            model: 'quizzes',
-            key: 'level',
-        },
-        onDelete: 'CASCADE',
-    },
-}, {
-    sequelize,
-    modelName: 'Question',
-    tableName: 'questions',
-    timestamps: false,
-} );
+// Associations
+Question.belongsTo( Quiz, { foreignKey: 'quiz_id', onDelete: 'CASCADE' } );
+Quiz.hasMany( Question, { foreignKey: 'quiz_id', onDelete: 'CASCADE' } );
 
 export default Question;

@@ -1,11 +1,8 @@
 import { DataTypes, Model, Optional } from 'sequelize';
 import sequelize from '../config/database';
 
-class User extends Model {
-
-}
-
-User.init(
+const User = sequelize.define(
+    'User',
     {
         user_id: {
             type: DataTypes.STRING( 250 ),
@@ -18,8 +15,6 @@ User.init(
         },
     },
     {
-        sequelize,
-        modelName: 'User',
         tableName: 'users',
         timestamps: false,
     }
