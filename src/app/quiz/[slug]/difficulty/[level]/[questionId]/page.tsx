@@ -149,14 +149,19 @@ const QuizPage = () => {
         let isCorrect = false;
 
         for ( const correctAnswer of correctAnswers ) {
+            // Calculate the Levenshtein distance between the user's answer and the correct answer
             const distance = levenshtein( userAnswer, correctAnswer );
-            const threshold = Math.floor( correctAnswer.length * 0.2 ); // 20% threshold
 
+            // Calculate the threshold (30% of the correct answer's length)
+            const threshold = Math.floor( correctAnswer.length * 0.3 );
+
+            // Check if the distance is within the acceptable threshold
             if ( distance <= threshold ) {
                 isCorrect = true;
                 break;
             }
         }
+
 
         if ( isCorrect ) {
             // Update the score if the answer is correct
