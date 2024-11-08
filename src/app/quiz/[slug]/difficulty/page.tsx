@@ -67,11 +67,11 @@ const DifficultySelectionPage: React.FC = () => {
     const handleLevelSelection = ( level: number ) => {
         if ( quizData.length > 0 ) {
             const quizId = quizData[0].quiz_id; // Use the first quiz's ID for routing (assuming same ID for levels)
-            if ( userProgress ) {
-                const currentQuestionId = userProgress.currentQuestion;
-                router.push( `/quiz/${ quizId }/level/${ currentQuestionId }` );
+            if ( quizData ) {
+                const currentQuestionId = userProgress?.currentQuestion;
+                router.push( `/quiz/${ currentTitle }/difficulty/${ currentQuestionId }` );
             } else {
-                router.push( `/quiz/${ quizId }/level/${ level }` );
+                router.push( `/quiz/${ currentTitle }/difficulty/${ level }` );
             }
         }
     };
@@ -89,7 +89,7 @@ const DifficultySelectionPage: React.FC = () => {
                 {quizData.map( ( quiz, index ) => (
                     <button
                         key={quiz.quiz_id}
-                        onClick={() => handleLevelSelection( quiz.level )}
+                        onClick={() => handleLevelSelection( index )}
                         className="button text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none font-medium rounded-lg text-md w-full sm:w-auto px-5 py-2.5 text-center"
                     >
                         Level {quiz.level}
