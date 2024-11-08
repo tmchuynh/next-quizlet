@@ -29,9 +29,8 @@ const QuizPage = () => {
             if ( currentTitle ) {
                 try {
                     // Fetch quiz data to get quiz_id
-                    const quizRes = await fetch( `/api/quizzes/${ currentTitle }` );
+                    const quizRes = await fetch( `/api/quizzes/${ encodeURIComponent( currentTitle ) }` );
                     const quizData = await quizRes.json();
-
 
                     if ( quizData.error ) {
                         console.error( 'Error fetching quiz:', quizData.error );
@@ -39,7 +38,9 @@ const QuizPage = () => {
                     }
 
                     // Fetch questions for the quiz
-                    const questionsRes = await fetch( `/api/quizzes/${ currentTitle }/difficulty/${ level }/questions` );
+                    const questionsRes = await fetch(
+                        `/api/quizzes/${ encodeURIComponent( currentTitle ) }/difficulty/${ level }/questions`
+                    );
                     const questionsData = await questionsRes.json();
 
                     if ( questionsData.error ) {
@@ -49,13 +50,28 @@ const QuizPage = () => {
 
                     // Shuffle questions
                     const questionsShuffled = questionsData.questions.sort( () => Math.random() - 0.5 );
-                    setShuffledQuestions( questionsShuffled );
-                    setQuestions( questionsShuffled );
 
+                    // Fetch answers for each question
+                    const questionsWithAnswers = await Promise.all(
+                        questionsShuffled.map( async ( question: Question ) => {
+                            const answersRes = await fetch( `/api/questions/${ question.question_id }/answers` );
+                            const answersData = await answersRes.json();
+
+                            if ( answersData.error ) {
+                                console.error( `Error fetching answers for question ${ question.question_id }:`, answersData.error );
+                                return { ...question, answers: [] }; // Return question with empty answers array
+                            }
+
+                            return { ...question, answers: answersData.answers };
+                        } )
+                    );
+
+                    setShuffledQuestions( questionsWithAnswers );
+                    setQuestions( questionsWithAnswers );
 
                     // Initialize score
-                    if ( questionsShuffled.length > 0 && !scoreId ) {
-                        await initializeScore( quizData.quiz_id, questionsShuffled.length );
+                    if ( questionsWithAnswers.length > 0 && !scoreId ) {
+                        await initializeScore( quizData.quiz_id, questionsWithAnswers.length );
                     }
                 } catch ( error ) {
                     console.error( 'Error fetching data:', error );
@@ -96,31 +112,13 @@ const QuizPage = () => {
 
     const currentQuestion = shuffledQuestions[currentQuestionIndex];
     if ( !currentQuestion ) return <div>Loading...</div>;
+    if ( currentQuestion.answers.length === 0 ) {
+        return <div>No answers available for this question.</div>;
+    }
     console.log( "CURRENT QUESTION", currentQuestion );
 
-    const handleSubmitAnswer = async ( correct: boolean ) => {
-
-        if ( correct ) {
-
-            // Update the score if the answer is correct
-            if ( scoreId ) {
-                await fetch( '/api/scores/update', {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify( { score_id: scoreId, increment: 1 } ),
-                } );
-            }
-        }
-    };
-
-    const handleWrittenAnswerSubmit = async () => {
-        const currentQuestion = shuffledQuestions[currentQuestionIndex];
-        const correctAnswer = currentQuestion.answers.find( ( answer: Answer ) => answer.is_correct );
-
-        if (
-            correctAnswer &&
-            userInput.trim().toLowerCase() === correctAnswer.answer_text.trim().toLowerCase()
-        ) {
+    const handleSubmitAnswer = async ( isCorrect: boolean ) => {
+        if ( isCorrect ) {
             setResult( 'Correct!' );
 
             // Update the score if the answer is correct
@@ -137,8 +135,38 @@ const QuizPage = () => {
     };
 
 
+
+    const handleWrittenAnswerSubmit = async () => {
+        const currentQuestion = shuffledQuestions[currentQuestionIndex];
+        const userAnswer = userInput.trim().toLowerCase();
+
+        // Find the correct answer(s)
+        const correctAnswers = currentQuestion.answers
+            .filter( ( answer: Answer ) => answer.is_correct )
+            .map( ( answer: Answer ) => answer.answer_text.trim().toLowerCase() );
+
+        // Check if the user's answer matches any of the correct answers
+        const isCorrect = correctAnswers.includes( userAnswer );
+
+        if ( isCorrect ) {
+            setResult( 'Correct!' );
+
+            // Update the score if the answer is correct
+            if ( scoreId ) {
+                await fetch( '/api/scores/update', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify( { score_id: scoreId, increment: 1 } ),
+                } );
+            }
+        } else {
+            setResult( 'Wrong answer.' );
+        }
+    };
+
+
+
     const goToNextQuestion = () => {
-        setUserInput( '' );
         setResult( null );
 
         if ( currentQuestionIndex < shuffledQuestions.length - 1 ) {
@@ -156,7 +184,7 @@ const QuizPage = () => {
             {currentQuestion.question_type === 'multiple_choice' || currentQuestion.question_type == "true_false" ? (
                 <div className='w-full flex flex-col'>
                     <div className="grid grid-cols-2 gap-4 p-3">
-                        {currentQuestion.answers.map( ( answers ) => (
+                        {currentQuestion.answers.map( ( answers: Answer ) => (
                             <button className="button text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none font-medium rounded-lg text-md w-full sm:w-auto px-5 py-2.5 text-center"
                                 key={answers.answer_id}
                                 onClick={() => handleSubmitAnswer( answers.is_correct )}
@@ -178,6 +206,7 @@ const QuizPage = () => {
                             className='bg-gray-50 border-2 border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500'
                             type="text"
                             value={userInput}
+                            onChange={( e ) => setUserInput( e.target.value )}
                             onKeyDown={( e ) => {
                                 if ( e.key === 'Enter' ) {
                                     handleWrittenAnswerSubmit();
