@@ -1,3 +1,4 @@
+import Quiz from '../models/Quiz';
 import UserQuizProgress from '../models/UserQuizProgress';
 import { Request, Response } from 'express';
 
@@ -72,5 +73,25 @@ export const handleQuizProgressUpdate = async ( req: Request, res: Response ) =>
         res.status( 200 ).json( { message: 'Quiz progress updated successfully' } );
     } catch ( error ) {
         res.status( 500 ).json( { error: 'Failed to update quiz progress' } );
+    }
+};
+
+
+export const getQuizByTitle = async ( title: string ): Promise<Quiz | null> => {
+    try {
+        // Fetch the quiz by title from the database
+        const quiz = await Quiz.findOne( {
+            where: { title },
+        } );
+
+        if ( !quiz ) {
+            console.log( 'Quiz not found' );
+            return null;
+        }
+
+        return quiz;
+    } catch ( error ) {
+        console.error( 'Error fetching quiz by title:', error );
+        throw error;
     }
 };

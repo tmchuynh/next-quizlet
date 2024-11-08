@@ -1,37 +1,45 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { QuizOption, ProgressItem } from '../../../types/index';
 import { useUser } from '@auth0/nextjs-auth0/client';
 
 const DifficultySelectionPage: React.FC = () => {
-    const router = useRouter();
-    const { quizId } = useParams();
-    const { user } = useUser();
-
-    console.log( 'Quiz ID:', quizId );
-    console.log( 'User:', user );
-
+    const [isMounted, setIsMounted] = useState( false );
     const [quizData, setQuizData] = useState<QuizOption | null>( null );
     const [userProgress, setUserProgress] = useState<ProgressItem | null>( null );
 
+    const router = useRouter();
+    const pathname = usePathname();
+    const segments = pathname.split( '/' ).filter( Boolean );
+    let currentTitle = segments.length > 1 ? decodeURIComponent( segments[1] ) : null;
+
+    const { user } = useUser();
+
     useEffect( () => {
-        if ( quizId && user ) {
-            fetchQuizData();
+        setIsMounted( true );
+    }, [] );
+
+    useEffect( () => {
+        if ( currentTitle ) {
+            fetchQuizDataByTitle( currentTitle );
+        }
+    }, [currentTitle] );
+
+    useEffect( () => {
+        if ( user && currentTitle ) {
             fetchUserProgress();
         }
-    }, [quizId, user] );
+    }, [user, currentTitle] );
 
-    const fetchQuizData = async () => {
+    const fetchQuizDataByTitle = async ( title: string ) => {
         try {
-            const response = await fetch( `/api/quiz-details/${ quizId }` )
-                .then( data => { console.log( data ); } );
-            // if ( !response.ok ) throw new Error( 'Failed to fetch quiz data' );
-            // const data = await response.json();
-
-            // console.log( "Data", data );
-            // setQuizData( data );
+            const response = await fetch( `/api/quiz-details?title=${ encodeURIComponent( title ) }` );
+            if ( !response.ok ) throw new Error( 'Failed to fetch quiz data' );
+            const data = await response.json();
+            console.log( 'Quiz data:', data );
+            setQuizData( data );
         } catch ( error ) {
             console.error( 'Error fetching quiz data:', error );
         }
@@ -39,7 +47,7 @@ const DifficultySelectionPage: React.FC = () => {
 
     const fetchUserProgress = async () => {
         try {
-            const response = await fetch( `/api/user-progress?userId=${ encodeURIComponent( user!.sub! ) }&quizId=${ quizId }` );
+            const response = await fetch( `/api/user-progress?userId=${ encodeURIComponent( user!.sub! ) }&quizTitle=${ encodeURIComponent( currentTitle! ) }` );
             if ( !response.ok ) throw new Error( 'Failed to fetch user progress' );
             const data = await response.json();
             setUserProgress( data );
@@ -49,13 +57,14 @@ const DifficultySelectionPage: React.FC = () => {
     };
 
     const handleLevelSelection = () => {
-        if ( userProgress ) {
-            // Use current_question_index from user progress for routing
-            const currentQuestionId = userProgress.currentQuestion;
-            router.push( `/quiz/${ quizId }/level/${ currentQuestionId }` );
-        } else {
-            // Default to the first question if no progress exists
-            router.push( `/quiz/${ quizId }/level/1` );
+        if ( quizData ) {
+            const quizId = quizData.id; // Ensure `quizData` contains `id`
+            if ( userProgress ) {
+                const currentQuestionId = userProgress.currentQuestion;
+                router.push( `/quiz/${ quizId }/level/${ currentQuestionId }` );
+            } else {
+                router.push( `/quiz/${ quizId }/level/1` );
+            }
         }
     };
 
@@ -67,7 +76,7 @@ const DifficultySelectionPage: React.FC = () => {
         <div className="flex flex-col min-h-full justify-center items-center px-6 py-4 lg:px-8 container border-4 border-gray-200 dark:border-gray-100 dark:bg-gray-800 dark:text-white rounded-2xl mx-auto my-4 w-full lg:w-11/12">
             <h2 className="text-center text-4xl py-5 font-extrabold dark:text-white">Select Difficulty for {quizData.label}</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-3 w-full">
-                {[...Array( userProgress?.level )].map( ( _, index ) => (
+                {[...Array( userProgress?.level || 0 )].map( ( _, index ) => (
                     <button
                         key={index}
                         onClick={handleLevelSelection}

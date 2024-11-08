@@ -3,38 +3,44 @@ import UserQuizProgress from '../../../backend/models/UserQuizProgress';
 import User from '../../../backend/models/User';  // Assuming there is a User model for the `users` table
 import { addUserToDatabase } from '../../../backend/controllers/userController';
 
-// Export the POST method
 export async function POST( request: Request ) {
     try {
         const body = await request.json();
         const { userId, quizId, currentQuestionIndex, score, completed } = body;
-
-        console.log( "UserId: ", userId, ", Quiz ID: ", quizId, ", Current Question Index: ", currentQuestionIndex, ", Score: ", score, ", Completed: ", completed );
 
         // Validate required fields
         if ( !userId || !quizId ) {
             return NextResponse.json( { error: 'User ID and quiz ID are required' }, { status: 400 } );
         }
 
-        // Check if user exists to avoid foreign key constraint issues
-        const userExists = await User.findOne( {
+        // Check if the user exists
+        let userExists = await User.findOne( {
             where: { user_id: userId },
         } );
 
+        // If user doesn't exist, add the user to the database
         if ( !userExists ) {
-            addUserToDatabase( userId );
-            NextResponse.json( { error: 'User not found' }, { status: 404 } );
+            userExists = await addUserToDatabase( userId );
+            if ( !userExists ) {
+                return NextResponse.json( { error: 'User could not be created' }, { status: 500 } );
+            }
         }
 
-        // Process logic to create or update user progress
+        // Check if user progress already exists
         const progress = await UserQuizProgress.findOne( {
             where: { user_id: userId, quiz_id: quizId },
         } );
 
         if ( progress ) {
-            await progress.update( { current_question_index: currentQuestionIndex, score, completed } );
-            return NextResponse.json( { message: 'Progress updated successfully' } );
+            // Update existing progress
+            await progress.update( {
+                current_question_index: currentQuestionIndex,
+                score,
+                completed,
+            } );
+            return NextResponse.json( { message: 'Progress updated successfully', progress } );
         } else {
+            // Create new progress entry
             const newProgress = await UserQuizProgress.create( {
                 user_id: userId,
                 quiz_id: quizId,
@@ -47,7 +53,7 @@ export async function POST( request: Request ) {
     } catch ( error: any ) {
         console.error( 'Error processing user progress:', error );
 
-        // Return specific error if it’s a foreign key constraint issue
+        // Handle specific database errors if needed
         if ( error.code === 'ER_NO_REFERENCED_ROW_2' ) {
             return NextResponse.json( { error: 'Invalid user ID or quiz ID reference' }, { status: 400 } );
         }

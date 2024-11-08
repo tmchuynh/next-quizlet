@@ -28,8 +28,11 @@ const QuizDifficultyPage: React.FC<QuizDifficultyPageProps> = ( { params } ) => 
                 const response = await fetch( `/api/quiz-details?quizId=${ quizId }`, {
                     method: 'GET',
                 } );
+
+                console.log( "Response:", response );
                 if ( response.ok ) {
                     const data = await response.json();
+
                     setQuizData( data.quiz );
                     setDifficultyLevels( data.levels );
                     setProgress( data.progress || [] );
