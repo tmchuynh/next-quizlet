@@ -25,9 +25,9 @@ export async function POST( request: Request ) {
 
             return NextResponse.json( { score_id: newScore.score_id } );
         }
-
     } catch ( error ) {
         console.error( 'Error initializing score:', error );
         return NextResponse.json( { error: 'Database insertion failed.' }, { status: 500 } );
     }
 }
+

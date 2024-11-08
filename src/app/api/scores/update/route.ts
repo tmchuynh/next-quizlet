@@ -15,7 +15,7 @@ export async function PUT( request: Request ) {
         score.score += increment;
         await score.save();
 
-        return NextResponse.json( { message: 'Score updated successfully.' } );
+        return NextResponse.json( score );
     } catch ( error ) {
         console.error( 'Error updating score:', error );
         return NextResponse.json( { error: 'Failed to update score.' }, { status: 500 } );

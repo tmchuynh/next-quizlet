@@ -1,14 +1,12 @@
 // app/api/quizzes/[slug]/route.ts
 
 import { NextResponse } from 'next/server';
-import { Quiz } from '../../../../backend/models/index';
+import { Quiz } from '../../../../backend/models';
 
 export async function GET(
     request: Request,
     { params }: { params: { slug: string; }; }
 ) {
-    console.log( 'Fetching quiz with params:', params );
-
     try {
         const { slug } = params;
 

@@ -1,24 +1,20 @@
+// app/api/quizzes/[quizId]/questions/route.ts
 import { NextResponse } from 'next/server';
-import Quiz from '../../../../../../../backend/models/Quiz';
-import Question from '../../../../../../../backend/models/Question';
+import { Answer, Question, Quiz } from '../../../../../../../backend/models/';
 
-export async function GET( request, { params } ) {
+export async function GET(
+    request: Request, response: Response
+) {
+
+    console.log( response );
     try {
-        const { slug } = params;
+        console.log( 'Fetching quiz ID from request URL:', request.url );
 
-        // Fetch the quiz to get the quiz_id
-        const quiz = await Quiz.findOne( {
-            where: { title: slug },
-        } );
-
-        if ( !quiz ) {
-            return NextResponse.json( { error: 'Quiz not found.' }, { status: 404 } );
-        }
-
-        const quizId = quiz.quiz_id;
+        console.log( `Fetching questions for quiz "${ title }" (quizId: ${ quizId })` );
 
         const questions = await Question.findAll( {
-            where: { quiz_id: quizId }
+            where: { quiz_id: quizId },
+            include: [{ model: Answer, as: 'answers' }],
         } );
 
         return NextResponse.json( { questions } );

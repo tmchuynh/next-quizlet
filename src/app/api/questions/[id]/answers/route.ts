@@ -1,18 +1,21 @@
 // app/api/questions/[id]/answers/route.ts
 import { NextResponse } from 'next/server';
-import Answer from '../../../../../backend/models/Answer';
+import { Answer } from '../../../../../backend/models'; // Adjust the import path
 
-export async function GET( { params }: { params: { question_id: string[]; }; } ) {
-    const questionIds = Array.isArray( params.question_id ) ? params.question_id : [params.question_id];
+export async function GET(
+    request: Request,
+    { params }: { params: { id: string; }; }
+) {
     try {
-        const answers: Answer[] = [];
-        questionIds.forEach( async ( id ) => {
-            const answer = await Answer.findOne( { where: { question_id: id } } ) || new Answer;
-            answers.push( answer );
+        const { id } = params;
+
+        const answers = await Answer.findAll( {
+            where: { question_id: id },
         } );
 
         return NextResponse.json( { answers } );
     } catch ( error ) {
-        return NextResponse.error();
+        console.error( 'Error fetching answers:', error );
+        return NextResponse.json( { error: 'Failed to fetch answers.' }, { status: 500 } );
     }
 }

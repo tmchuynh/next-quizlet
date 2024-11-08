@@ -2,7 +2,7 @@ import { DataTypes, Model } from 'sequelize';
 import sequelize from '../config/database';
 
 class Score extends Model {
-    score_id: number | undefined;
+    score_id?: number | undefined;
     score: number | undefined;
     user_id: string | undefined;
     quiz_id: string | undefined;

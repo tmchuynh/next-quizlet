@@ -15,6 +15,7 @@ const QuizPage = () => {
     const segments = pathname.split( '/' ).filter( Boolean );
     const currentTitle = segments.length > 1 ? decodeURIComponent( segments[1] ) : null;
     const level = parseInt( segments[3] );
+    const question_id = parseInt( segments[4] );
 
     const [questions, setQuestions] = useState<Question[]>( [] );
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState( 0 );
@@ -33,16 +34,17 @@ const QuizPage = () => {
                     const quizRes = await fetch( `/api/quizzes/${ currentTitle }` );
                     const quizData = await quizRes.json();
 
+
                     if ( quizData.error ) {
                         console.error( 'Error fetching quiz:', quizData.error );
                         return;
                     }
 
-                    const quizId = quizData.quiz_id;
-
                     // Fetch questions for the quiz
-                    const questionsRes = await fetch( `/api/quizzes/${ currentTitle }/difficulty/${ currentQuestionIndex }/questions` );
+                    const questionsRes = await fetch( `/api/questions/${ question_id }/answers` );
                     const questionsData = await questionsRes.json();
+
+                    console.log( 'Questions:', questionsData );
 
                     if ( questionsData.error ) {
                         console.error( 'Error fetching questions:', questionsData.error );
@@ -66,27 +68,44 @@ const QuizPage = () => {
 
         const initializeScore = async ( quizId: number, totalQuestions: number ) => {
             try {
-                const userId = user?.sub; // Implement this function
+                const userId = user?.sub;
+
+                if ( !userId ) {
+                    console.error( 'User ID is undefined.' );
+                    return;
+                }
 
                 const res = await fetch( '/api/scores/init', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify( { user_id: userId, level: level, quiz_id: quizId, total_questions: totalQuestions } ),
+                    body: JSON.stringify( { user_id: userId, level, quiz_id: quizId, total_questions: totalQuestions } ),
                 } );
 
                 const data = await res.json();
-                setScoreId( data.score_id );
+
+                if ( res.ok ) {
+                    setScoreId( data.score_id );
+                } else {
+                    console.error( 'Failed to initialize score:', data.error );
+                }
             } catch ( error ) {
                 console.error( 'Failed to initialize score:', error );
             }
         };
 
-        const fetchAnswerData = async () => {
 
-        };
 
         fetchQuestionData();
+
     }, [currentTitle] );
+
+    const currentQuestion = shuffledQuestions[currentQuestionIndex];
+    if ( !currentQuestion ) return <div>Loading...</div>;
+    console.log( currentQuestion );
+    console.log( 'Question ID:', currentQuestion.question_id );
+    console.log( 'Question Text:', currentQuestion.question_text );
+    console.log( 'Question Type:', currentQuestion.question_type );
+
 
     const handleAnswerSelect = ( answerId: string ) => {
         setSelectedAnswer( answerId );
@@ -96,7 +115,9 @@ const QuizPage = () => {
         setIsSubmitting( true );
 
         const currentQuestion = shuffledQuestions[currentQuestionIndex];
-        const selectedAnswerData = currentQuestion.answers.find( ( answer: Answer ) => answer.answer_id === parseInt( selectedAnswer || '', 10 ) );
+        const selectedAnswerData = currentQuestion.answers.find(
+            ( answer: Answer ) => answer.answer_id === parseInt( selectedAnswer || '', 10 )
+        );
 
         if ( selectedAnswerData ) {
             const isCorrect = selectedAnswerData.is_correct;
@@ -121,8 +142,12 @@ const QuizPage = () => {
         const currentQuestion = shuffledQuestions[currentQuestionIndex];
         const correctAnswer = currentQuestion.answers.find( ( answer: Answer ) => answer.is_correct );
 
-        if ( correctAnswer && userInput.trim().toLowerCase() === correctAnswer.answer_text.trim().toLowerCase() ) {
+        if (
+            correctAnswer &&
+            userInput.trim().toLowerCase() === correctAnswer.answer_text.trim().toLowerCase()
+        ) {
             setResult( 'Correct!' );
+
             // Update the score if the answer is correct
             if ( scoreId ) {
                 await fetch( '/api/scores/update', {
@@ -135,6 +160,7 @@ const QuizPage = () => {
             setResult( 'Wrong answer.' );
         }
     };
+
 
     const goToNextQuestion = () => {
         setSelectedAnswer( null );
@@ -149,11 +175,6 @@ const QuizPage = () => {
         }
     };
 
-    if ( !questions.length ) return <div>Loading...</div>;
-
-    const currentQuestion = shuffledQuestions[currentQuestionIndex];
-
-    console.log( currentQuestion );
 
     return (
         <div className="flex flex-col min-h-full justify-center items-center px-6 py-4 lg:px-8 container border-4 border-gray-200 dark:border-gray-100 dark:bg-gray-800 dark:text-white rounded-2xl mx-auto my-4 w-full lg:w-11/12">
