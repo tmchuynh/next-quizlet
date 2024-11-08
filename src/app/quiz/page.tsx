@@ -55,6 +55,7 @@ const QuizSelectionPage: React.FC = () => {
 
         if ( !user?.sub || !quizTitle ) {
             console.error( 'User ID or quiz title is missing' );
+            router.push( '/api/auth/login' );
             return;
         }
 
@@ -77,6 +78,9 @@ const QuizSelectionPage: React.FC = () => {
             if ( !response.ok ) {
                 const errorData = await response.json();
                 console.error( 'Server responded with error:', errorData );
+
+
+
                 throw new Error( 'Failed to update quiz progress' );
             }
 

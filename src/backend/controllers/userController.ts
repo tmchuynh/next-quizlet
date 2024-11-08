@@ -5,11 +5,13 @@ import axios from 'axios';
 
 export const getUserProfile = async ( req: Request, res: Response ) => {
     try {
-        const userId = parseInt( req.params.id );
-        const user = await User.findByPk( userId );
+        const userId = req.params.id;
+        let user = await getUserById( userId );
 
         if ( !user ) {
-            return res.status( 404 ).json( { error: 'User not found' } );
+            res.status( 404 ).json( { error: 'User not found' } );
+            addUserToDatabase( user.user_id );
+            user = await getUserById( user.user_id );
         }
 
         res.json( {

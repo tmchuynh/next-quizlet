@@ -48,7 +48,7 @@ export async function getUserQuizProgress( userId: string ): Promise<UserQuizPro
         } );
         return progress;
     } catch ( error ) {
-        console.error( 'Error fetching user quiz progress:', error );
+        console.error( 'Error:', error );
         throw new Error( 'Failed to fetch quiz progress' );
     }
 }

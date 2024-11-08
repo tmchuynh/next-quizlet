@@ -2,6 +2,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getSession, withApiAuthRequired, Session } from '@auth0/nextjs-auth0';
 import User from '../../..//backend/models/User'; // Make sure this path points to your User model
+import { addUserToDatabase } from '../../../backend/controllers/userController';
 
 export default withApiAuthRequired( async function handler(
     req: NextApiRequest,
@@ -38,6 +39,7 @@ async function fetchUserDashboardData(
     } );
 
     if ( !user ) {
+        addUserToDatabase( userId );
         throw new Error( `User with ID ${ userId } not found` );
     }
 
