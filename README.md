@@ -6,7 +6,7 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 -   [Technologies Used](#technologies-used)
 -   [Getting Started](#getting-started)
 -   [Roadmap](#roadmap)
--   [License](#license)difficulty levels.
+-   [License](#license)
 
 ## Features
 
